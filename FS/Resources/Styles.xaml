@@ -1,0 +1,124 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                    xmlns:local="clr-namespace:FS">
+
+    <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
+        <DockPanel>
+            <Button>
+                Sync
+            </Button>
+            <TextBlock VerticalAlignment="Center" Text="{Binding FullPath}" />
+        </DockPanel>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:SyncViewModel}" />
+
+    <DataTemplate DataType="{x:Type local:Pattern}">
+        <TextBlock Text="{Binding Value}" />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:Patterns}">
+        <Grid>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBox Grid.Row="0"
+                     Grid.Column="0"
+                     Text="{Binding Content, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Grid.Row="0"
+                    Grid.Column="2"
+                    Command="{Binding AddCommand}"
+                    Content="Add" />
+
+            <ListBox Grid.Row="2"
+                     Grid.Column="0"
+                     ItemsSource="{Binding Items}"
+                     SelectedItem="{Binding SelectedItem}"
+                     SelectionMode="Extended">
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                        <MenuItem Command="{Binding AddCommand}" Header="Add" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+                <i:Interaction.Behaviors>
+                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                </i:Interaction.Behaviors>
+            </ListBox>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid Margin="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.5*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ContentControl Grid.Row="0"
+                            Grid.Column="0"
+                            Content="{Binding Includes}" />
+            <ContentControl Grid.Row="0"
+                            Grid.Column="2"
+                            Content="{Binding Excludes}" />
+
+            <ListBox Grid.Row="2"
+                     Grid.Column="0" SelectionMode="Multiple"
+                     Grid.ColumnSpan="5"
+                     ItemsSource="{Binding Items}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Loaded">
+                        <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <i:Interaction.Behaviors>
+                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                </i:Interaction.Behaviors>
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                        <MenuItem Command="{Binding SyncCommand}" Header="Sync" />
+                        <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+
+            <TextBlock Grid.Row="4"
+                       Grid.Column="0"
+                       Text="{Binding Count}" />
+
+            <Button Grid.Row="4"
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Command="{Binding RefreshCommand}"
+                    Content="Accept" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
