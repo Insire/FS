@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-                    xmlns:local="clr-namespace:FS">
+                    xmlns:local="clr-namespace:FS"
+                    xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
         <DockPanel>
@@ -11,6 +12,10 @@
 
     <DataTemplate DataType="{x:Type local:Pattern}">
         <TextBlock Text="{Binding Value}" />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:LogEntry}">
+        <TextBlock Text="{Binding Message}" />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:Patterns}">
@@ -114,6 +119,8 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="4" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="4" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0"
@@ -121,7 +128,7 @@
                                                Text="Name:" />
                                     <TextBox Grid.Row="0"
                                              Grid.Column="2"
-                                             Text="{Binding Name}" />
+                                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
 
                                     <TextBlock Grid.Row="2"
                                                Grid.Column="0"
@@ -135,10 +142,19 @@
                                                Text="Interval:" />
                                     <TextBox Grid.Row="4"
                                              Grid.Column="2"
-                                             Text="{Binding TargetDirectory}" />
+                                             Text="{Binding IntervalInput, UpdateSourceTrigger=PropertyChanged}" />
 
-                                    <GroupBox Grid.Row="6" Grid.ColumnSpan="3"
+                                    <TextBlock Grid.Row="6"
+                                               Grid.Column="0"
+                                               Text="Interval:" />
+                                    <ComboBox Grid.Row="6"
+                                              Grid.Column="2"
+                                              ItemsSource="{Binding Source={mvvm:EnumBindingSource {x:Type local:IntervalType}}}"
+                                              SelectedItem="{Binding IntervalType}" />
+
+                                    <GroupBox Grid.Row="8"
                                               Grid.Column="0"
+                                              Grid.ColumnSpan="3"
                                               Header="Settings:">
                                         <StackPanel Orientation="Vertical">
                                             <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
@@ -203,16 +219,16 @@
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   HorizontalAlignment="Center"
-                                                   Text="Test" />
+                                        <local:CountDown Grid.Row="0"
+                                                         HorizontalAlignment="Center"
+                                                         DueTime="{Binding NextExecution}" />
 
                                         <ProgressBar Grid.Row="2"
                                                      Maximum="100"
                                                      Minimum="0"
                                                      Value="50" />
 
-                                        <ItemsControl Grid.Row="4" ItemsSource="{Binding Items}" />
+                                        <ItemsControl Grid.Row="4" ItemsSource="{Binding Log.Items}" />
                                     </Grid>
                                 </Setter.Value>
                             </Setter>

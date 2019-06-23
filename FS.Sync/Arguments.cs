@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace FS
+﻿namespace FS.Sync
 {
-    public class DirectoriesModel
+    public sealed class Arguments
     {
-        public List<PatternModel> Includes { get; set; }
-        public List<PatternModel> Excludes { get; set; }
-
-        public string TargetDirectory { get; set; }
-        public string Name { get; set; }
-        public int Id { get; set; }
+        public string Source { get; set; }
+        public string Destination { get; set; }
+        public string Pattern { get; set; } = "*";
+        public bool Nonrecursive { get; set; }
+        public bool WhatIf { get; set; }
 
         public bool CopyLeftOnlyFiles { get; set; } = true;
         public bool UpdateChangedFiles { get; set; } = true;
@@ -19,6 +15,5 @@ namespace FS
         public bool DeleteRightOnlyDirectories { get; set; } = true;
         public bool DeleteSameFiles { get; set; }
         public bool DeleteChangedFiles { get; set; }
-        public TimeSpan Interval { get; private set; } = TimeSpan.FromSeconds(30);
     }
 }

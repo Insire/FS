@@ -1,7 +1,8 @@
-﻿using GuiLabs.FileUtilities;
+﻿using FS.Sync;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -12,53 +13,55 @@ namespace FS
 {
     public sealed class DirectoriesViewModel : BusinessViewModelListBase<DirectoryViewModel>
     {
-        private bool copyLeftOnlyFiles = true;
+        private Timer _timer;
+
+        private bool _copyLeftOnlyFiles = true;
         public bool CopyLeftOnlyFiles
         {
-            get { return copyLeftOnlyFiles; }
-            set { SetValue(ref copyLeftOnlyFiles, value); }
+            get { return _copyLeftOnlyFiles; }
+            set { SetValue(ref _copyLeftOnlyFiles, value); }
         }
 
-        private bool updateChangedFiles = true;
+        private bool _updateChangedFiles = true;
         public bool UpdateChangedFiles
         {
-            get { return updateChangedFiles; }
-            set { SetValue(ref updateChangedFiles, value); }
+            get { return _updateChangedFiles; }
+            set { SetValue(ref _updateChangedFiles, value); }
         }
 
-        private bool deleteRightOnlyFiles = true;
+        private bool _deleteRightOnlyFiles = true;
         public bool DeleteRightOnlyFiles
         {
-            get { return deleteRightOnlyFiles; }
-            set { SetValue(ref deleteRightOnlyFiles, value); }
+            get { return _deleteRightOnlyFiles; }
+            set { SetValue(ref _deleteRightOnlyFiles, value); }
         }
 
-        private bool copyEmptyDirectories = true;
+        private bool _copyEmptyDirectories = true;
         public bool CopyEmptyDirectories
         {
-            get { return copyEmptyDirectories; }
-            set { SetValue(ref copyEmptyDirectories, value); }
+            get { return _copyEmptyDirectories; }
+            set { SetValue(ref _copyEmptyDirectories, value); }
         }
 
-        private bool deleteRightOnlyDirectories = true;
+        private bool _deleteRightOnlyDirectories = true;
         public bool DeleteRightOnlyDirectories
         {
-            get { return deleteRightOnlyDirectories; }
-            set { SetValue(ref deleteRightOnlyDirectories, value); }
+            get { return _deleteRightOnlyDirectories; }
+            set { SetValue(ref _deleteRightOnlyDirectories, value); }
         }
 
-        private bool deleteSameFiles;
+        private bool _deleteSameFiles;
         public bool DeleteSameFiles
         {
-            get { return deleteSameFiles; }
-            set { SetValue(ref deleteSameFiles, value); }
+            get { return _deleteSameFiles; }
+            set { SetValue(ref _deleteSameFiles, value); }
         }
 
-        private bool deleteChangedFiles;
+        private bool _deleteChangedFiles;
         public bool DeleteChangedFiles
         {
-            get { return deleteChangedFiles; }
-            set { SetValue(ref deleteChangedFiles, value); }
+            get { return _deleteChangedFiles; }
+            set { SetValue(ref _deleteChangedFiles, value); }
         }
 
         private Patterns _includes;
@@ -73,6 +76,13 @@ namespace FS
         {
             get { return _excludes; }
             private set { SetValue(ref _excludes, value); }
+        }
+
+        private LogViewModel _log;
+        public LogViewModel Log
+        {
+            get { return _log; }
+            private set { SetValue(ref _log, value); }
         }
 
         private string _sourceDirctory;
@@ -97,11 +107,38 @@ namespace FS
         }
 
         private bool _isActive;
-
         public bool IsActive
         {
             get { return _isActive; }
             private set { SetValue(ref _isActive, value); }
+        }
+
+        private TimeSpan _interval = TimeSpan.FromSeconds(30);
+        public TimeSpan Interval
+        {
+            get { return _interval; }
+            private set { SetValue(ref _interval, value); }
+        }
+
+        private IntervalType _intervalType = IntervalType.Seconds;
+        public IntervalType IntervalType
+        {
+            get { return _intervalType; }
+            set { SetValue(ref _intervalType, value, OnChanged: OnIntervalTypeChanged); }
+        }
+
+        private string _intervalInput = "30";
+        public string IntervalInput
+        {
+            get { return _intervalInput; }
+            set { SetValue(ref _intervalInput, value, OnChanged: OnIntervalInputChanged); }
+        }
+
+        private DateTime _nextExecution;
+        public DateTime NextExecution
+        {
+            get { return _nextExecution; }
+            private set { SetValue(ref _nextExecution, value); }
         }
 
         public ICommand SyncCommand { get; }
@@ -112,6 +149,7 @@ namespace FS
         {
             Excludes = new Patterns(commandBuilder);
             Includes = new Patterns(commandBuilder);
+            Log = new LogViewModel(commandBuilder);
 
             SyncCommand = commandBuilder
                 .Create(Sync, CanSync)
@@ -137,6 +175,7 @@ namespace FS
             using (BusyStack.GetToken())
             {
                 await Refresh(token);
+                await Log.Clear(token);
                 await Items.ForEachAsync(p => Task.Run(() => GuiLabs.FileUtilities.Sync.Directories(p.FullPath, TargetDirectory, new Arguments()
                 {
                     CopyEmptyDirectories = CopyEmptyDirectories,
@@ -146,7 +185,11 @@ namespace FS
                     DeleteRightOnlyFiles = DeleteRightOnlyFiles,
                     DeleteSameFiles = DeleteSameFiles,
                     UpdateChangedFiles = UpdateChangedFiles,
-                })));
+                }, new Sync.Log((message, color) => Log.Add(new LogEntry(CommandBuilder)
+                {
+                    Message = message,
+                    Color = color,
+                })))));
             }
         }
 
@@ -158,9 +201,78 @@ namespace FS
                 && TargetDirectory.Length > 0;
         }
 
-        private Task Toggle()
+        private void OnIntervalTypeChanged()
         {
-            return Dispatcher.Invoke(() => IsActive = !IsActive);
+            UpdateTimer();
+        }
+
+        private void OnIntervalInputChanged()
+        {
+            UpdateTimer();
+        }
+
+        private void UpdateTimer()
+        {
+            if (IntervalInput.Length <= 0)
+                return;
+
+            if (IntervalInput.Length > 3)
+                return;
+
+            if (!IntervalInput.All(c => char.IsDigit(c)))
+                return;
+
+            switch (IntervalType)
+            {
+                case IntervalType.Seconds:
+                    Interval = TimeSpan.FromSeconds(double.Parse(IntervalInput));
+                    break;
+
+                case IntervalType.Minutes:
+                    Interval = TimeSpan.FromMinutes(double.Parse(IntervalInput));
+                    break;
+
+                case IntervalType.Hours:
+                    Interval = TimeSpan.FromHours(double.Parse(IntervalInput));
+                    break;
+            }
+
+            if (_timer is null)
+                return;
+
+            _timer.Change(TimeSpan.Zero, Interval);
+        }
+
+        private async Task Toggle()
+        {
+            using (BusyStack.GetToken())
+            {
+                if (_timer is null)
+                {
+                    _timer = new Timer(Callback, null, TimeSpan.Zero, Interval);
+                }
+                else
+                {
+                    _timer.Dispose();
+                    _timer = null;
+                }
+
+                await UpdateExecution();
+                await Dispatcher.Invoke(() => IsActive = !IsActive);
+            }
+
+            async void Callback(object state)
+            {
+                await Sync(CancellationToken.None);
+                await UpdateExecution();
+            }
+
+            async Task UpdateExecution()
+            {
+                var nextExecution = DateTime.Now + Interval;
+
+                await Dispatcher.Invoke(() => NextExecution = nextExecution);
+            }
         }
 
         private bool CanToggle()

@@ -1,7 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,11 +12,8 @@
     <Compile Include="..\ContentSync\src\ContentSync\Files.cs" Link="Files.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\FileSystem.cs" Link="FileSystem.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Folders.cs" Link="Folders.cs" />
-    <Compile Include="..\ContentSync\src\ContentSync\Log.cs" Link="Log.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Paths.cs" Link="Paths.cs" />
-    <Compile Include="..\ContentSync\src\ContentSync\Program.cs" Link="Program.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Sync.cs" Link="Sync.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Utilities.cs" Link="Utilities.cs" />
   </ItemGroup>
-
 </Project>
