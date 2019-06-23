@@ -1,0 +1,3 @@
+[submodule "ContentSync"]
+	path = ContentSync
+	url = https://github.com/KirillOsenkov/ContentSync.git
