@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using Akavache;
+using MvvmScarletToolkit;
+using System.Windows;
 
 namespace FS
 {
@@ -16,6 +18,13 @@ namespace FS
                 DataContext = datacontext,
             };
             window.Show();
+        }
+
+        protected override async void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+            await ExitService.Default.ShutDown();
+            BlobCache.Shutdown().Wait();
         }
     }
 }

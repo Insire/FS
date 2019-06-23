@@ -11,13 +11,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cake.Core" Version="0.33.0" />
-    <PackageReference Include="Cake.Incubator" Version="5.0.1" />
+    <PackageReference Include="akavache" Version="6.5.9" />
     <PackageReference Include="DryIoc.dll" Version="4.0.5" />
     <PackageReference Include="Expression.Blend.Sdk" Version="1.0.2" />
-    <PackageReference Include="MvvmScarletToolkit.Commands" Version="2.0.6" />
-    <PackageReference Include="MvvmScarletToolkit.Implementations" Version="2.0.6" />
-    <PackageReference Include="MvvmScarletToolkit.Observables" Version="2.0.6" />
+    <PackageReference Include="MvvmScarletToolkit.Commands" Version="2.0.18" />
+    <PackageReference Include="MvvmScarletToolkit.Implementations" Version="2.0.18" />
+    <PackageReference Include="MvvmScarletToolkit.Observables" Version="2.0.18" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FS.Sync\FS.Sync.csproj" />
   </ItemGroup>
 
 </Project>

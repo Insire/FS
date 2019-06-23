@@ -4,9 +4,11 @@ using MvvmScarletToolkit.Commands;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace FS
 {
+    [DebuggerDisplay("{Content} - {Count}")]
     public sealed class Patterns : BusinessViewModelListBase<Pattern>
     {
         private string _content;
@@ -36,6 +38,11 @@ namespace FS
                     Value = Content,
                 });
             }
+        }
+
+        protected override Task UnloadInternal(CancellationToken token)
+        {
+            return base.UnloadInternal(token);
         }
 
         private bool CanAdd()

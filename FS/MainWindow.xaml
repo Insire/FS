@@ -8,7 +8,7 @@
         Height="450"
         mc:Ignorable="d">
 
-    <DockPanel>
+    <DockPanel Margin="4">
         <ContentControl Content="{Binding}" />
     </DockPanel>
 </Window>

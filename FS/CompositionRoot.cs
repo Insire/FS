@@ -1,9 +1,9 @@
-﻿using DryIoc;
+﻿using Akavache;
+using DryIoc;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
-using System.Windows.Threading;
 
 namespace FS
 {
@@ -15,12 +15,15 @@ namespace FS
             c.Register<DirectoriesViewModel>(Reuse.Singleton);
             c.Register<SyncsViewModel>(Reuse.Singleton);
             c.Register<MainViewModel>(Reuse.Singleton);
-            c.Register<IScarletCommandManager, ScarletCommandManager>(Reuse.Singleton);
             c.Register<ICommandBuilder, CommandBuilder>(Reuse.Singleton);
 
-            c.UseInstance(app.Dispatcher);
-            c.Register<IScarletDispatcher, ScarletDispatcher>(made: Made.Of(() => new ScarletDispatcher(Arg.Of<Dispatcher>())), reuse: Reuse.Singleton);
             c.Register<IBusyStack, BusyStack>(Reuse.Transient);
+
+            Registrations.Start("FS");
+            c.UseInstance(typeof(IBlobCache), BlobCache.UserAccount);
+            c.UseInstance(typeof(IScarletCommandManager), ScarletCommandManager.Default);
+            c.UseInstance(typeof(IScarletDispatcher), ScarletDispatcher.Default);
+            c.UseInstance(typeof(IExitService), ExitService.Default);
 
             return c;
         }

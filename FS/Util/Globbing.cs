@@ -8,14 +8,26 @@ namespace FS
     public static class Globbing
     {
         /// <summary>
+        /// return a list of folders that matches some wildcard pattern, e.g.
+        /// C:\p4\software\dotnet\tools\*\*.sln to get all tool solution files
+        /// </summary>
+        /// <param name="glob">pattern to match</param>
+        /// <returns>all matching paths</returns>
+        public static IEnumerable<string> GlobFolders(string glob)
+        {
+            foreach (string path in GlobFolders(PathHead(glob) + _dirSep, PathTail(glob)))
+                yield return path;
+        }
+
+        /// <summary>
         /// return a list of files that matches some wildcard pattern, e.g.
         /// C:\p4\software\dotnet\tools\*\*.sln to get all tool solution files
         /// </summary>
         /// <param name="glob">pattern to match</param>
         /// <returns>all matching paths</returns>
-        public static IEnumerable<string> Glob(string glob)
+        public static IEnumerable<string> GlobFiles(string glob)
         {
-            foreach (string path in Glob(PathHead(glob) + _dirSep, PathTail(glob)))
+            foreach (string path in GlobFiles(PathHead(glob) + _dirSep, PathTail(glob)))
                 yield return path;
         }
 
@@ -26,14 +38,32 @@ namespace FS
         /// <param name="head">wildcard-expanded</param>
         /// <param name="tail">not yet wildcard-expanded</param>
         /// <returns></returns>
-        public static IEnumerable<string> Glob(string head, string tail)
+        public static IEnumerable<string> GlobFolders(string head, string tail)
         {
             if (PathTail(tail) == tail)
                 foreach (string path in Directory.GetDirectories(head, tail).OrderBy(s => s))
                     yield return path;
             else
                 foreach (string dir in Directory.GetDirectories(head, PathHead(tail)).OrderBy(s => s))
-                    foreach (string path in Glob(Path.Combine(head, dir), PathTail(tail)))
+                    foreach (string path in GlobFolders(Path.Combine(head, dir), PathTail(tail)))
+                        yield return path;
+        }
+
+        /// <summary>
+        /// uses 'head' and 'tail' -- 'head' has already been pattern-expanded
+        /// and 'tail' has not.
+        /// </summary>
+        /// <param name="head">wildcard-expanded</param>
+        /// <param name="tail">not yet wildcard-expanded</param>
+        /// <returns></returns>
+        public static IEnumerable<string> GlobFiles(string head, string tail)
+        {
+            if (PathTail(tail) == tail)
+                foreach (string path in Directory.GetFiles(head, tail).OrderBy(s => s))
+                    yield return path;
+            else
+                foreach (string dir in Directory.GetDirectories(head, PathHead(tail)).OrderBy(s => s))
+                    foreach (string path in GlobFiles(Path.Combine(head, dir), PathTail(tail)))
                         yield return path;
         }
 
