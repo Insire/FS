@@ -16,8 +16,8 @@ namespace FS
         private const string _key = "FS.SyncsViewModel";
         private readonly IBlobCache _cache;
 
-        private DirectoryInfo _root;
-        public DirectoryInfo Root
+        private string _root;
+        public string Root
         {
             get { return _root; }
             set { SetValue(ref _root, value); }
@@ -44,14 +44,14 @@ namespace FS
 
                 if (Root is null)
                 {
-                    Root = new DirectoryInfo(".");
+                    Root = new DirectoryInfo(".").FullName;
                 }
             }
             else
             {
                 if (Root is null)
                 {
-                    Root = new DirectoryInfo(".");
+                    Root = new DirectoryInfo(".").FullName;
                 }
             }
 
@@ -95,7 +95,7 @@ namespace FS
         {
             _cache.GetObject<SyncsModel>(_key).Subscribe(async model =>
             {
-                Root = new DirectoryInfo(model.Root);
+                Root = model.Root;
 
                 foreach (var item in model.Items)
                 {
@@ -103,7 +103,14 @@ namespace FS
                     {
                         Id = item.Id,
                         Name = item.Name,
-                        TargetDirectory = new DirectoryInfo(item.TargetDirectory),
+                        TargetDirectory = item.TargetDirectory,
+                        CopyEmptyDirectories = item.CopyEmptyDirectories,
+                        CopyLeftOnlyFiles = item.CopyLeftOnlyFiles,
+                        UpdateChangedFiles = item.UpdateChangedFiles,
+                        DeleteSameFiles = item.DeleteSameFiles,
+                        DeleteRightOnlyFiles = item.DeleteRightOnlyFiles,
+                        DeleteRightOnlyDirectories = item.DeleteRightOnlyDirectories,
+                        DeleteChangedFiles = item.DeleteChangedFiles,
                     };
                     await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(CommandBuilder)
                     {
@@ -123,12 +130,19 @@ namespace FS
         {
             var model = new SyncsModel()
             {
-                Root = Root.FullName,
+                Root = Root,
                 Items = Items.Select(p => new DirectoriesModel()
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    TargetDirectory = p.TargetDirectory.FullName,
+                    TargetDirectory = p.TargetDirectory,
+                    CopyEmptyDirectories = p.CopyEmptyDirectories,
+                    CopyLeftOnlyFiles = p.CopyLeftOnlyFiles,
+                    UpdateChangedFiles = p.UpdateChangedFiles,
+                    DeleteSameFiles = p.DeleteSameFiles,
+                    DeleteRightOnlyFiles = p.DeleteRightOnlyFiles,
+                    DeleteRightOnlyDirectories = p.DeleteRightOnlyDirectories,
+                    DeleteChangedFiles = p.DeleteChangedFiles,
                     Excludes = p.Excludes.Items.Select(o => new PatternModel()
                     {
                         Value = o.Value,

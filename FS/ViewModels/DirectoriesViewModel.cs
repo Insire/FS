@@ -3,7 +3,6 @@ using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +12,55 @@ namespace FS
 {
     public sealed class DirectoriesViewModel : BusinessViewModelListBase<DirectoryViewModel>
     {
+        private bool copyLeftOnlyFiles = true;
+        public bool CopyLeftOnlyFiles
+        {
+            get { return copyLeftOnlyFiles; }
+            set { SetValue(ref copyLeftOnlyFiles, value); }
+        }
+
+        private bool updateChangedFiles = true;
+        public bool UpdateChangedFiles
+        {
+            get { return updateChangedFiles; }
+            set { SetValue(ref updateChangedFiles, value); }
+        }
+
+        private bool deleteRightOnlyFiles = true;
+        public bool DeleteRightOnlyFiles
+        {
+            get { return deleteRightOnlyFiles; }
+            set { SetValue(ref deleteRightOnlyFiles, value); }
+        }
+
+        private bool copyEmptyDirectories = true;
+        public bool CopyEmptyDirectories
+        {
+            get { return copyEmptyDirectories; }
+            set { SetValue(ref copyEmptyDirectories, value); }
+        }
+
+        private bool deleteRightOnlyDirectories = true;
+        public bool DeleteRightOnlyDirectories
+        {
+            get { return deleteRightOnlyDirectories; }
+            set { SetValue(ref deleteRightOnlyDirectories, value); }
+        }
+
+        private bool deleteSameFiles;
+        public bool DeleteSameFiles
+        {
+            get { return deleteSameFiles; }
+            set { SetValue(ref deleteSameFiles, value); }
+        }
+
+        private bool deleteChangedFiles;
+        public bool DeleteChangedFiles
+        {
+            get { return deleteChangedFiles; }
+            set { SetValue(ref deleteChangedFiles, value); }
+        }
+
         private Patterns _includes;
         public Patterns Includes
         {
@@ -27,8 +75,8 @@ namespace FS
             private set { SetValue(ref _excludes, value); }
         }
 
-        private DirectoryInfo _sourceDirctory;
-        public DirectoryInfo TargetDirectory
+        private string _sourceDirctory;
+        public string TargetDirectory
         {
             get { return _sourceDirctory; }
             set { SetValue(ref _sourceDirctory, value); }
@@ -48,7 +96,16 @@ namespace FS
             set { SetValue(ref _id, value); }
         }
 
+        private bool _isActive;
+
+        public bool IsActive
+        {
+            get { return _isActive; }
+            private set { SetValue(ref _isActive, value); }
+        }
+
         public ICommand SyncCommand { get; }
+        public ICommand ToggleCommand { get; }
 
         public DirectoriesViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
@@ -58,6 +115,11 @@ namespace FS
 
             SyncCommand = commandBuilder
                 .Create(Sync, CanSync)
+                .WithSingleExecution(CommandManager)
+                .Build();
+
+            ToggleCommand = commandBuilder
+                .Create(Toggle, CanToggle)
                 .WithSingleExecution(CommandManager)
                 .Build();
         }
@@ -75,7 +137,16 @@ namespace FS
             using (BusyStack.GetToken())
             {
                 await Refresh(token);
-                await Items.ForEachAsync(p => Task.Run(() => FileSystem.CopyFile(p.FullPath, TargetDirectory.FullName, false)));
+                await Items.ForEachAsync(p => Task.Run(() => GuiLabs.FileUtilities.Sync.Directories(p.FullPath, TargetDirectory, new Arguments()
+                {
+                    CopyEmptyDirectories = CopyEmptyDirectories,
+                    CopyLeftOnlyFiles = CopyLeftOnlyFiles,
+                    DeleteChangedFiles = DeleteChangedFiles,
+                    DeleteRightOnlyDirectories = DeleteRightOnlyDirectories,
+                    DeleteRightOnlyFiles = DeleteRightOnlyFiles,
+                    DeleteSameFiles = DeleteSameFiles,
+                    UpdateChangedFiles = UpdateChangedFiles,
+                })));
             }
         }
 
@@ -84,7 +155,17 @@ namespace FS
             return !IsBusy
                 && Count > 0
                 && Includes.Count > 0
-                && TargetDirectory != null;
+                && TargetDirectory.Length > 0;
+        }
+
+        private Task Toggle()
+        {
+            return Dispatcher.Invoke(() => IsActive = !IsActive);
+        }
+
+        private bool CanToggle()
+        {
+            return !IsBusy;
         }
     }
 }
