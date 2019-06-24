@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FS
 {
@@ -40,11 +42,6 @@ namespace FS
             }
         }
 
-        protected override Task UnloadInternal(CancellationToken token)
-        {
-            return base.UnloadInternal(token);
-        }
-
         private bool CanAdd()
         {
             return !IsBusy && !string.IsNullOrWhiteSpace(Content);
@@ -53,6 +50,15 @@ namespace FS
         protected override Task RefreshInternal(CancellationToken token)
         {
             return Task.CompletedTask;
+        }
+
+        public IEnumerable<string> GetDirectories()
+        {
+            return Items
+                .Where(p => !string.IsNullOrWhiteSpace(p.Value))
+                .Select(p => root.GlobDirectories(p.Value))
+                .SelectMany(p => p)
+                .Select(p => p.FullName);
         }
     }
 }
