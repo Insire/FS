@@ -97,7 +97,7 @@ namespace FS
         private string _root;
         public string Root
         {
-            get { return _root; }
+            get { return _root ?? new DirectoryInfo(".").FullName; }
             set { SetValue(ref _root, value); }
         }
 
@@ -156,8 +156,8 @@ namespace FS
         public DirectoriesViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
-            Excludes = new Patterns(commandBuilder);
-            Includes = new Patterns(commandBuilder);
+            Excludes = new Patterns(commandBuilder, this);
+            Includes = new Patterns(commandBuilder, this);
             Log = new LogViewModel(commandBuilder);
 
             SyncCommand = commandBuilder
@@ -179,7 +179,7 @@ namespace FS
             var includes = new HashSet<string>(Includes.GetDirectories());
             var excludes = new HashSet<string>(Excludes.GetDirectories());
 
-            await AddRange(includes.Except(excludes).Select(p => new DirectoryViewModel(CommandBuilder, p))).ConfigureAwait(false);
+            await AddRange(includes.Except(excludes).OrderBy(p => p).Select(p => new DirectoryViewModel(CommandBuilder, p))).ConfigureAwait(false);
         }
 
         private async Task Sync(CancellationToken token)

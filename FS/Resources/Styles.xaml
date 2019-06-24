@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:local="clr-namespace:FS"
+                    xmlns:mah="clr-namespace:MahApps.Metro.IconPacks;assembly=MahApps.Metro.IconPacks.FontAwesome"
                     xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
@@ -66,172 +67,181 @@
         </Grid>
     </DataTemplate>
 
+    <DataTemplate x:Key="DirectoriesActiveTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid>
+            <Grid.ContextMenu>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                    <MenuItem Command="{Binding ToggleCommand}" Header="Deactivate" />
+                </ContextMenu>
+            </Grid.ContextMenu>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <local:CountDown Grid.Row="0"
+                             HorizontalAlignment="Center"
+                             DueTime="{Binding NextExecution}" />
+
+            <ProgressBar Grid.Row="2"
+                         Maximum="100"
+                         Minimum="0"
+                         Value="50" />
+
+            <ItemsControl Grid.Row="4" ItemsSource="{Binding Log.Items}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DirectoriesConfigTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <Grid.ContextMenu>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                    <MenuItem Command="{Binding ToggleCommand}" Header="Activate" />
+                    <MenuItem Command="{Binding SyncCommand}" Header="Sync" />
+                </ContextMenu>
+            </Grid.ContextMenu>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           Text="Name:" />
+                <TextBox Grid.Row="0"
+                         Grid.Column="2"
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="2"
+                           Grid.Column="0"
+                           Text="Source:" />
+                <TextBox Grid.Row="2"
+                         Grid.Column="2"
+                         Text="{Binding Root}" />
+
+                <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Text="Destination:" />
+                <TextBox Grid.Row="4"
+                         Grid.Column="2"
+                         Text="{Binding TargetDirectory}" />
+
+                <TextBlock Grid.Row="6"
+                           Grid.Column="0"
+                           Text="Interval:" />
+                <TextBox Grid.Row="6"
+                         Grid.Column="2"
+                         Text="{Binding IntervalInput, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="8"
+                           Grid.Column="0"
+                           Text="Interval:" />
+                <ComboBox Grid.Row="8"
+                          Grid.Column="2"
+                          ItemsSource="{Binding Source={mvvm:EnumBindingSource {x:Type local:IntervalType}}}"
+                          SelectedItem="{Binding IntervalType}" />
+
+                <GroupBox Grid.Row="10"
+                          Grid.Column="0"
+                          Grid.ColumnSpan="3"
+                          Header="Settings:">
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
+                        <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
+                        <CheckBox Content="DeleteRightOnlyFiles" IsChecked="{Binding DeleteRightOnlyFiles}" />
+                        <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
+                        <CheckBox Content="DeleteRightOnlyDirectories" IsChecked="{Binding DeleteRightOnlyDirectories}" />
+                        <CheckBox Content="DeleteSameFiles" IsChecked="{Binding DeleteSameFiles}" />
+                        <CheckBox Content="DeleteChangedFiles" IsChecked="{Binding DeleteChangedFiles}" />
+                    </StackPanel>
+                </GroupBox>
+            </Grid>
+
+            <ContentControl Grid.Row="2"
+                            Grid.Column="0"
+                            Content="{Binding Includes}" />
+            <ContentControl Grid.Row="2"
+                            Grid.Column="2"
+                            Content="{Binding Excludes}" />
+
+            <ListBox Grid.Row="4"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="5"
+                     ItemsSource="{Binding Items}"
+                     SelectionMode="Multiple">
+
+                <i:Interaction.Behaviors>
+                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                </i:Interaction.Behaviors>
+
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                        <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
+
+            <TextBlock Grid.Row="6"
+                       Grid.Column="0"
+                       Text="{Binding Count}" />
+        </Grid>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
-        <ContentControl>
+        <ContentControl Content="{Binding}">
             <ContentControl.Style>
-                <Style TargetType="ContentControl">
-                    <Setter Property="Content">
-                        <Setter.Value>
-                            <Grid>
-                                <i:Interaction.Triggers>
-                                    <i:EventTrigger EventName="Loaded">
-                                        <i:InvokeCommandAction Command="{Binding LoadCommand}" />
-                                    </i:EventTrigger>
-                                </i:Interaction.Triggers>
-
-                                <Grid.ContextMenu>
-                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                        <MenuItem Command="{Binding ToggleCommand}" Header="Activate" />
-                                        <MenuItem Command="{Binding SyncCommand}" Header="Sync" />
-                                    </ContextMenu>
-                                </Grid.ContextMenu>
-
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="4" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="4" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="4" />
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="4" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="4" />
-                                </Grid.RowDefinitions>
-
-                                <Grid Grid.Row="0"
-                                      Grid.Column="0"
-                                      Grid.ColumnSpan="3">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="4" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="4" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="4" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="4" />
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="4" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0"
-                                               Grid.Column="0"
-                                               Text="Name:" />
-                                    <TextBox Grid.Row="0"
-                                             Grid.Column="2"
-                                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <TextBlock Grid.Row="2"
-                                               Grid.Column="0"
-                                               Text="Destination:" />
-                                    <TextBox Grid.Row="2"
-                                             Grid.Column="2"
-                                             Text="{Binding TargetDirectory}" />
-
-                                    <TextBlock Grid.Row="4"
-                                               Grid.Column="0"
-                                               Text="Interval:" />
-                                    <TextBox Grid.Row="4"
-                                             Grid.Column="2"
-                                             Text="{Binding IntervalInput, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <TextBlock Grid.Row="6"
-                                               Grid.Column="0"
-                                               Text="Interval:" />
-                                    <ComboBox Grid.Row="6"
-                                              Grid.Column="2"
-                                              ItemsSource="{Binding Source={mvvm:EnumBindingSource {x:Type local:IntervalType}}}"
-                                              SelectedItem="{Binding IntervalType}" />
-
-                                    <GroupBox Grid.Row="8"
-                                              Grid.Column="0"
-                                              Grid.ColumnSpan="3"
-                                              Header="Settings:">
-                                        <StackPanel Orientation="Vertical">
-                                            <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
-                                            <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
-                                            <CheckBox Content="DeleteRightOnlyFiles" IsChecked="{Binding DeleteRightOnlyFiles}" />
-                                            <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
-                                            <CheckBox Content="DeleteRightOnlyDirectories" IsChecked="{Binding DeleteRightOnlyDirectories}" />
-                                            <CheckBox Content="DeleteSameFiles" IsChecked="{Binding DeleteSameFiles}" />
-                                            <CheckBox Content="DeleteChangedFiles" IsChecked="{Binding DeleteChangedFiles}" />
-                                        </StackPanel>
-                                    </GroupBox>
-                                </Grid>
-
-                                <ContentControl Grid.Row="2"
-                                                Grid.Column="0"
-                                                Content="{Binding Includes}" />
-                                <ContentControl Grid.Row="2"
-                                                Grid.Column="2"
-                                                Content="{Binding Excludes}" />
-
-                                <ListBox Grid.Row="4"
-                                         Grid.Column="0"
-                                         Grid.ColumnSpan="5"
-                                         ItemsSource="{Binding Items}"
-                                         SelectionMode="Multiple">
-
-                                    <i:Interaction.Behaviors>
-                                        <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
-                                    </i:Interaction.Behaviors>
-
-                                    <ListBox.ContextMenu>
-                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" />
-                                            <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
-                                            <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
-                                        </ContextMenu>
-                                    </ListBox.ContextMenu>
-                                </ListBox>
-
-                                <TextBlock Grid.Row="6"
-                                           Grid.Column="0"
-                                           Text="{Binding Count}" />
-                            </Grid>
-                        </Setter.Value>
-                    </Setter>
+                <Style TargetType="{x:Type ContentControl}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource DirectoriesConfigTemplate}" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsActive}" Value="True">
-                            <Setter Property="Content">
-                                <Setter.Value>
-                                    <Grid>
-                                        <Grid.ContextMenu>
-                                            <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                                <MenuItem Command="{Binding ToggleCommand}" Header="Deactivate" />
-                                            </ContextMenu>
-                                        </Grid.ContextMenu>
-
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="4" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="4" />
-                                            <RowDefinition Height="*" />
-                                        </Grid.RowDefinitions>
-
-                                        <local:CountDown Grid.Row="0"
-                                                         HorizontalAlignment="Center"
-                                                         DueTime="{Binding NextExecution}" />
-
-                                        <ProgressBar Grid.Row="2"
-                                                     Maximum="100"
-                                                     Minimum="0"
-                                                     Value="50" />
-
-                                        <ItemsControl Grid.Row="4" ItemsSource="{Binding Log.Items}" />
-                                    </Grid>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="ContentTemplate" Value="{StaticResource DirectoriesActiveTemplate}" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -268,12 +278,18 @@
                     <Style TargetType="ContentControl">
                         <Setter Property="Content">
                             <Setter.Value>
-                                <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}">
+                                <ListBox ItemsSource="{Binding Items}"
+                                         SelectedItem="{Binding SelectedItem}"
+                                         SelectionMode="Extended">
                                     <ListBox.Resources>
                                         <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
                                             <TextBlock Text="{Binding Name}" />
                                         </DataTemplate>
                                     </ListBox.Resources>
+
+                                    <i:Interaction.Behaviors>
+                                        <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                                    </i:Interaction.Behaviors>
 
                                     <ListBox.ContextMenu>
                                         <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
@@ -304,7 +320,7 @@
                                             </Grid.RowDefinitions>
 
                                             <StackPanel>
-                                                <Button Command="{Binding AddCommand}" Content="Add" />
+                                                <Button Command="{Binding AddCommand}" Content="{mah:FontAwesome Kind=PlusSolid}" />
                                                 <TextBlock Text="There is nothing here yet, add a new sync?" TextWrapping="Wrap" />
                                             </StackPanel>
                                         </Grid>

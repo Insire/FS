@@ -7,12 +7,17 @@ using System.Windows.Input;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System;
+using System.IO;
+using GlobExpressions;
 
 namespace FS
 {
     [DebuggerDisplay("{Content} - {Count}")]
     public sealed class Patterns : BusinessViewModelListBase<Pattern>
     {
+        private readonly DirectoriesViewModel _directoriesViewModel;
+
         private string _content;
         public string Content
         {
@@ -22,9 +27,11 @@ namespace FS
 
         public ICommand AddCommand { get; }
 
-        public Patterns(ICommandBuilder commandBuilder)
+        public Patterns(ICommandBuilder commandBuilder, DirectoriesViewModel directoriesViewModel)
             : base(commandBuilder)
         {
+            _directoriesViewModel = directoriesViewModel ?? throw new ArgumentNullException(nameof(directoriesViewModel));
+
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
                 .WithSingleExecution(CommandManager)
@@ -54,6 +61,8 @@ namespace FS
 
         public IEnumerable<string> GetDirectories()
         {
+            var root = new DirectoryInfo(_directoriesViewModel.Root);
+
             return Items
                 .Where(p => !string.IsNullOrWhiteSpace(p.Value))
                 .Select(p => root.GlobDirectories(p.Value))

@@ -103,6 +103,7 @@ namespace FS
                     {
                         Id = item.Id,
                         Name = item.Name,
+                        Root = item.Root,
                         TargetDirectory = item.TargetDirectory,
                         CopyEmptyDirectories = item.CopyEmptyDirectories,
                         CopyLeftOnlyFiles = item.CopyLeftOnlyFiles,
@@ -135,6 +136,7 @@ namespace FS
                 {
                     Id = p.Id,
                     Name = p.Name,
+                    Root = p.Root,
                     TargetDirectory = p.TargetDirectory,
                     CopyEmptyDirectories = p.CopyEmptyDirectories,
                     CopyLeftOnlyFiles = p.CopyLeftOnlyFiles,

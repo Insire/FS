@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace FS
 {
@@ -8,8 +9,9 @@ namespace FS
         public List<PatternModel> Includes { get; set; }
         public List<PatternModel> Excludes { get; set; }
 
-        public string TargetDirectory { get; set; }
-        public string Name { get; set; }
+        public string TargetDirectory { get; set; } = new DirectoryInfo(".").FullName;
+        public string Name { get; set; } = string.Empty;
+        public string Root { get; set; } = new DirectoryInfo(".").FullName;
         public int Id { get; set; }
 
         public bool CopyLeftOnlyFiles { get; set; } = true;
