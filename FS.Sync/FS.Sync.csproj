@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\ContentSync\src\ContentSync\Arguments.cs" Link="Arguments.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\DiffResults.cs" Link="DiffResults.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\DirectoryContentsCache.cs" Link="DirectoryContentsCache.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Files.cs" Link="Files.cs" />

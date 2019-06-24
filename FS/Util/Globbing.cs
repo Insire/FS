@@ -41,12 +41,22 @@ namespace FS
         public static IEnumerable<string> GlobFolders(string head, string tail)
         {
             if (PathTail(tail) == tail)
+            {
                 foreach (string path in Directory.GetDirectories(head, tail).OrderBy(s => s))
+                {
                     yield return path;
+                }
+            }
             else
+            {
                 foreach (string dir in Directory.GetDirectories(head, PathHead(tail)).OrderBy(s => s))
+                {
                     foreach (string path in GlobFolders(Path.Combine(head, dir), PathTail(tail)))
+                    {
                         yield return path;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -59,12 +69,22 @@ namespace FS
         public static IEnumerable<string> GlobFiles(string head, string tail)
         {
             if (PathTail(tail) == tail)
+            {
                 foreach (string path in Directory.GetFiles(head, tail).OrderBy(s => s))
+                {
                     yield return path;
+                }
+            }
             else
+            {
                 foreach (string dir in Directory.GetDirectories(head, PathHead(tail)).OrderBy(s => s))
+                {
                     foreach (string path in GlobFiles(Path.Combine(head, dir), PathTail(tail)))
+                    {
                         yield return path;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -83,7 +103,9 @@ namespace FS
             // because the dir stuff won't let you interrogate a server for its share list
             // FIXME check behavior on Linux to see if this blows up -- I don't think so
             if (path.StartsWith("" + _dirSep + _dirSep))
+            {
                 return path.Substring(0, 2) + path.Substring(2).Split(_dirSep)[0] + _dirSep + path.Substring(2).Split(_dirSep)[1];
+            }
 
             return path.Split(_dirSep)[0];
         }
@@ -97,7 +119,9 @@ namespace FS
         private static string PathTail(string path)
         {
             if (!path.Contains(_dirSep))
+            {
                 return path;
+            }
 
             return path.Substring(1 + PathHead(path).Length);
         }

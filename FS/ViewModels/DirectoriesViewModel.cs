@@ -1,9 +1,11 @@
 ﻿using FS.Sync;
+using GlobExpressions;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -92,6 +94,13 @@ namespace FS
             set { SetValue(ref _sourceDirctory, value); }
         }
 
+        private string _root;
+        public string Root
+        {
+            get { return _root; }
+            set { SetValue(ref _root, value); }
+        }
+
         private string _name;
         public string Name
         {
@@ -164,18 +173,21 @@ namespace FS
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
-            var includes = new HashSet<string>(Includes.Items.Where(p => !string.IsNullOrWhiteSpace(p.Value)).Select(p => p.Value).SelectMany(Globbing.GlobFolders));
-            var excludes = new HashSet<string>(Excludes.Items.Where(p => !string.IsNullOrWhiteSpace(p.Value)).Select(p => p.Value).SelectMany(Globbing.GlobFolders));
+            var root = new DirectoryInfo(Root);
 
-            await AddRange(includes.Except(excludes).Select(p => new DirectoryViewModel(CommandBuilder, p)));
+            var directories = Includes.GetDirectories();
+            var includes = new HashSet<string>(Includes.GetDirectories());
+            var excludes = new HashSet<string>(Excludes.GetDirectories());
+
+            await AddRange(includes.Except(excludes).Select(p => new DirectoryViewModel(CommandBuilder, p))).ConfigureAwait(false);
         }
 
         private async Task Sync(CancellationToken token)
         {
             using (BusyStack.GetToken())
             {
-                await Refresh(token);
-                await Log.Clear(token);
+                await Refresh(token).ConfigureAwait(false);
+                await Log.Clear(token).ConfigureAwait(false);
                 await Items.ForEachAsync(p => Task.Run(() => GuiLabs.FileUtilities.Sync.Directories(p.FullPath, TargetDirectory, new Arguments()
                 {
                     CopyEmptyDirectories = CopyEmptyDirectories,
@@ -185,11 +197,11 @@ namespace FS
                     DeleteRightOnlyFiles = DeleteRightOnlyFiles,
                     DeleteSameFiles = DeleteSameFiles,
                     UpdateChangedFiles = UpdateChangedFiles,
-                }, new Sync.Log((message, color) => Log.Add(new LogEntry(CommandBuilder)
+                }, new Log((message, color) => Log.Add(new LogEntry(CommandBuilder)
                 {
                     Message = message,
                     Color = color,
-                })))));
+                }))))).ConfigureAwait(false);
             }
         }
 
@@ -257,21 +269,23 @@ namespace FS
                     _timer = null;
                 }
 
-                await UpdateExecution();
-                await Dispatcher.Invoke(() => IsActive = !IsActive);
+                await UpdateExecution().ConfigureAwait(false);
+                await Dispatcher.Invoke(() => IsActive = !IsActive).ConfigureAwait(false);
             }
 
+#pragma warning disable RCS1163 // Unused parameter.
             async void Callback(object state)
             {
-                await Sync(CancellationToken.None);
-                await UpdateExecution();
+                await Sync(CancellationToken.None).ConfigureAwait(false);
+                await UpdateExecution().ConfigureAwait(false);
             }
+#pragma warning restore RCS1163 // Unused parameter.
 
             async Task UpdateExecution()
             {
                 var nextExecution = DateTime.Now + Interval;
 
-                await Dispatcher.Invoke(() => NextExecution = nextExecution);
+                await Dispatcher.Invoke(() => NextExecution = nextExecution).ConfigureAwait(false);
             }
         }
 
