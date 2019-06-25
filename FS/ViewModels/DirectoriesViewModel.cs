@@ -337,7 +337,16 @@ namespace FS
 
         private async Task Exclude(CancellationToken token)
         {
-            await Excludes.Add(new Pattern(SelectedItem.FullPath));
+            var root = Root
+                .TrimEnd('\\')
+                .TrimEnd('/');
+
+            var pathWithOutRoot = SelectedItem.FullPath
+                .Replace(root, string.Empty)
+                .Trim('\\')
+                .Trim('/');
+
+            await Excludes.Add(new Pattern($"**/{pathWithOutRoot}"));
             await Remove();
         }
 

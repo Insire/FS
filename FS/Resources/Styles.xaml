@@ -140,13 +140,15 @@
                          Value="{Binding Progress.Value}" />
 
             <Expander Grid.Row="4" Header="{Binding Log.Count, StringFormat={}Log: {0}}">
-                <ItemsControl ItemsSource="{Binding Log.Items}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Log.Items}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel VirtualizationMode="Recycling" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
             </Expander>
 
             <Button Grid.Row="6" Command="{Binding ToggleCommand}">
@@ -316,8 +318,8 @@
             <ListBox Grid.Row="8"
                      Grid.Column="0"
                      Grid.ColumnSpan="5"
-                     SelectedItem="{Binding SelectedItem}"
                      ItemsSource="{Binding Items}"
+                     SelectedItem="{Binding SelectedItem}"
                      SelectionMode="Extended">
 
                 <ListBox.ToolTip>
