@@ -21,6 +21,6 @@ namespace FS
         public bool DeleteRightOnlyDirectories { get; set; } = true;
         public bool DeleteSameFiles { get; set; }
         public bool DeleteChangedFiles { get; set; }
-        public TimeSpan Interval { get; private set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(30);
     }
 }

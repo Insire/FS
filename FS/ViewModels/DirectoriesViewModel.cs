@@ -126,7 +126,7 @@ namespace FS
         public TimeSpan Interval
         {
             get { return _interval; }
-            private set { SetValue(ref _interval, value); }
+            set { SetValue(ref _interval, value); }
         }
 
         private IntervalType _intervalType;
