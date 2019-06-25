@@ -129,7 +129,7 @@ namespace FS
             private set { SetValue(ref _interval, value); }
         }
 
-        private IntervalType _intervalType = IntervalType.Seconds;
+        private IntervalType _intervalType;
         public IntervalType IntervalType
         {
             get { return _intervalType; }
@@ -184,7 +184,7 @@ namespace FS
                 return includes
                     .Except(excludes)
                     .OrderBy(p => p)
-                    .Select(p => new DirectoryViewModel(CommandBuilder, p))
+                    .Select(p => new DirectoryViewModel(p))
                     .ToArray();
             }).ConfigureAwait(false);
 
@@ -206,7 +206,7 @@ namespace FS
                     DeleteRightOnlyFiles = DeleteRightOnlyFiles,
                     DeleteSameFiles = DeleteSameFiles,
                     UpdateChangedFiles = UpdateChangedFiles,
-                }, new Log((message, color) => Log.Add(new LogEntry(CommandBuilder)
+                }, new Log((message, color) => Log.Add(new LogEntry()
                 {
                     Message = message,
                     Color = color,

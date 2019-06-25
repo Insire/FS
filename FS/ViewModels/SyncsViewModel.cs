@@ -66,7 +66,7 @@ namespace FS
                 TargetDirectory = Root,
                 Name = "new Sync" + (Count + 1),
                 Id = Count + 1
-            });
+            }).ConfigureAwait(false);
 
             if (SelectedItem is null)
             {
@@ -113,23 +113,16 @@ namespace FS
                         DeleteRightOnlyDirectories = item.DeleteRightOnlyDirectories,
                         DeleteChangedFiles = item.DeleteChangedFiles,
                     };
-                    await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(CommandBuilder)
-                    {
-                        Value = p.Value
-                    }));
-
-                    await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(CommandBuilder)
-                    {
-                        Value = p.Value
-                    }));
-                    await Add(dModel);
+                    await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
+                    await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
+                    await Add(dModel).ConfigureAwait(false);
                 }
             });
         }
 
         private SyncsModel GetModel()
         {
-            var model = new SyncsModel()
+            return new SyncsModel()
             {
                 Root = Root,
                 Items = Items.Select(p => new DirectoriesModel()
@@ -155,8 +148,6 @@ namespace FS
                     }).ToList(),
                 }).ToList(),
             };
-
-            return model;
         }
     }
 }

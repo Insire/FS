@@ -42,10 +42,7 @@ namespace FS
         {
             using (BusyStack.GetToken())
             {
-                await Add(new Pattern(CommandBuilder)
-                {
-                    Value = Content,
-                });
+                await Add(new Pattern(Content)).ConfigureAwait(false);
             }
         }
 

@@ -1,9 +1,8 @@
-﻿using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Observables;
+﻿using MvvmScarletToolkit.Observables;
 
 namespace FS
 {
-    public sealed class DirectoryViewModel : ViewModelBase
+    public sealed class DirectoryViewModel : ObservableObject
     {
         private string _name;
         public string Name
@@ -19,8 +18,7 @@ namespace FS
             private set { SetValue(ref _fullPath, value); }
         }
 
-        public DirectoryViewModel(ICommandBuilder commandBuilder, string fullPath)
-            : base(commandBuilder)
+        public DirectoryViewModel(string fullPath)
         {
             FullPath = fullPath;
         }

@@ -1,10 +1,9 @@
-﻿using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Observables;
+﻿using MvvmScarletToolkit.Observables;
 using System;
 
 namespace FS
 {
-    public sealed class LogEntry : ViewModelBase
+    public sealed class LogEntry : ObservableObject
     {
         private string _message;
         public string Message
@@ -18,11 +17,6 @@ namespace FS
         {
             get { return _color; }
             set { SetValue(ref _color, value); }
-        }
-
-        public LogEntry(ICommandBuilder commandBuilder)
-            : base(commandBuilder)
-        {
         }
     }
 }
