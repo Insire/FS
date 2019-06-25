@@ -1,13 +1,13 @@
-﻿using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Observables;
+﻿using Akavache;
+using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
+using MvvmScarletToolkit.Observables;
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Akavache;
-using System;
-using System.Linq;
 
 namespace FS
 {

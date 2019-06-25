@@ -1,15 +1,15 @@
-﻿using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Observables;
+﻿using GlobExpressions;
+using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
+using MvvmScarletToolkit.Observables;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using System.IO;
-using GlobExpressions;
 
 namespace FS
 {

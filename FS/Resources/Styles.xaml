@@ -5,6 +5,8 @@
                     xmlns:mah="http://metro.mahapps.com/winfx/xaml/iconpacks"
                     xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
+    <local:ConsoleColorConverter x:Key="ConsoleColorConverter" />
+
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
         <DockPanel>
             <TextBlock VerticalAlignment="Center" Text="{Binding FullPath}" />
@@ -16,7 +18,7 @@
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:LogEntry}">
-        <TextBlock Text="{Binding Message}" />
+        <TextBlock Foreground="{Binding Color, Converter={StaticResource ConsoleColorConverter}}" Text="{Binding Message}" />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:Patterns}">
@@ -122,11 +124,21 @@
                              DueTime="{Binding NextExecution}" />
 
             <ProgressBar Grid.Row="2"
-                         Maximum="100"
-                         Minimum="0"
-                         Value="50" />
+                         Maximum="{Binding Progress.Maximum}"
+                         Minimum="{Binding Progress.Minimum}"
+                         Value="{Binding Progress.Value}" />
 
-            <ItemsControl Grid.Row="4" ItemsSource="{Binding Log.Items}" />
+            <ScrollViewer Grid.Row="4"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto">
+                <ItemsControl Background="Black" ItemsSource="{Binding Log.Items}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel VirtualizationMode="Recycling" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </DataTemplate>
 
@@ -302,6 +314,23 @@
         </ContentControl>
     </DataTemplate>
 
+    <DataTemplate x:Key="NoSelectedDirectoriesViewModelTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="There is nothing selected yet." TextWrapping="Wrap" />
+        </Grid>
+    </DataTemplate>
+
     <DataTemplate x:Key="EmptySyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
@@ -327,27 +356,10 @@
         </Grid>
     </DataTemplate>
 
-    <DataTemplate x:Key="NoSelectedDirectoriesViewModelTemplate" DataType="{x:Type local:DirectoriesViewModel}">
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="There is nothing selected yet." TextWrapping="Wrap" />
-        </Grid>
-    </DataTemplate>
-
     <DataTemplate x:Key="DefaultSyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.33*" />
+                <ColumnDefinition Width="0.25*" />
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="4" />
@@ -366,7 +378,18 @@
                      SelectionMode="Extended">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
-                        <TextBlock Text="{Binding Name}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                            <DockPanel Grid.Column="2">
+                                <mah:PackIconFontAwesome Kind="Check" ToolTip="IsActive" />
+                                <TextBlock Text="{Binding Count}" />
+                            </DockPanel>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.Resources>
 

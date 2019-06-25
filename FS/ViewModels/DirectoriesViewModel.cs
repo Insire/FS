@@ -1,5 +1,4 @@
 ﻿using FS.Sync;
-using GlobExpressions;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
@@ -15,6 +14,8 @@ namespace FS
 {
     public sealed class DirectoriesViewModel : BusinessViewModelListBase<DirectoryViewModel>
     {
+        private readonly IProgress<int> _progress;
+        private bool _syncInProgress;
         private Timer _timer;
 
         private bool _copyLeftOnlyFiles = true;
@@ -87,6 +88,13 @@ namespace FS
             private set { SetValue(ref _log, value); }
         }
 
+        private ProgressViewModel _progressViewModel;
+        public ProgressViewModel Progress
+        {
+            get { return _progressViewModel; }
+            private set { SetValue(ref _progressViewModel, value); }
+        }
+
         private string _sourceDirctory;
         public string TargetDirectory
         {
@@ -156,8 +164,12 @@ namespace FS
         public DirectoriesViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
+            var progress = new Progress<int>();
+            _progress = progress;
+
             Excludes = new Patterns(commandBuilder, this);
             Includes = new Patterns(commandBuilder, this);
+            Progress = new ProgressViewModel(progress);
             Log = new LogViewModel(commandBuilder);
 
             SyncCommand = commandBuilder
@@ -193,25 +205,40 @@ namespace FS
 
         private async Task Synchronize(CancellationToken token)
         {
+            _syncInProgress = true;
+
             using (BusyStack.GetToken())
             {
+                Progress.Minimum = 0;
+                Progress.Maximum = Items.Count;
+                Progress.Value = 0;
+
                 await Refresh(token).ConfigureAwait(false);
                 await Log.Clear(token).ConfigureAwait(false);
-                await Items.ForEachAsync(p => Task.Run(() => GuiLabs.FileUtilities.Sync.Directories(p.FullPath, TargetDirectory, new Arguments()
-                {
-                    CopyEmptyDirectories = CopyEmptyDirectories,
-                    CopyLeftOnlyFiles = CopyLeftOnlyFiles,
-                    DeleteChangedFiles = DeleteChangedFiles,
-                    DeleteRightOnlyDirectories = DeleteRightOnlyDirectories,
-                    DeleteRightOnlyFiles = DeleteRightOnlyFiles,
-                    DeleteSameFiles = DeleteSameFiles,
-                    UpdateChangedFiles = UpdateChangedFiles,
-                }, new Log((message, color) => Log.Add(new LogEntry()
-                {
-                    Message = message,
-                    Color = color,
-                }))))).ConfigureAwait(false);
+                await Items.ForEachAsync(p => Task.Run(() => SyncDirectory(p.FullPath))).ConfigureAwait(false);
             }
+
+            _syncInProgress = false;
+        }
+
+        private void SyncDirectory(string path)
+        {
+            GuiLabs.FileUtilities.Sync.Directories(path, TargetDirectory, new Arguments()
+            {
+                CopyEmptyDirectories = CopyEmptyDirectories,
+                CopyLeftOnlyFiles = CopyLeftOnlyFiles,
+                DeleteChangedFiles = DeleteChangedFiles,
+                DeleteRightOnlyDirectories = DeleteRightOnlyDirectories,
+                DeleteRightOnlyFiles = DeleteRightOnlyFiles,
+                DeleteSameFiles = DeleteSameFiles,
+                UpdateChangedFiles = UpdateChangedFiles,
+            }, new Log(async (message, color) => await Log.Add(new LogEntry()
+            {
+                Message = message,
+                Color = color,
+            }).ConfigureAwait(false)));
+
+            _progress.Report(1);
         }
 
         private bool CanSync()
@@ -285,6 +312,9 @@ namespace FS
 #pragma warning disable RCS1163 // Unused parameter.
             async void Callback(object state)
             {
+                if (_syncInProgress)
+                    return;
+
                 await Synchronize(CancellationToken.None).ConfigureAwait(false);
                 await UpdateExecution().ConfigureAwait(false);
             }

@@ -1,12 +1,11 @@
-﻿using System;
-using MvvmScarletToolkit.Observables;
+﻿using MvvmScarletToolkit.Observables;
+using System;
 
 namespace FS
 {
     public sealed class Pattern : ObservableObject
     {
         private string _value;
-
         public string Value
         {
             get { return _value; }
