@@ -3,7 +3,6 @@ using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -158,6 +157,7 @@ namespace FS
             private set { SetValue(ref _nextExecution, value); }
         }
 
+        public ICommand ExcludeCommand { get; }
         public ICommand SyncCommand { get; }
         public ICommand ToggleCommand { get; }
 
@@ -181,20 +181,22 @@ namespace FS
                 .Create(Toggle, CanToggle)
                 .WithSingleExecution(CommandManager)
                 .Build();
+
+            ExcludeCommand = commandBuilder
+                .Create(Exclude, CanExclude)
+                .WithSingleExecution(CommandManager)
+                .Build();
         }
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
             var items = await Task.Run(() =>
             {
-                var root = new DirectoryInfo(Root);
+                var includes = Includes.GetDirectories();
+                var excludes = Excludes.GetDirectories();
 
-                var directories = Includes.GetDirectories();
-                var includes = new HashSet<string>(Includes.GetDirectories());
-                var excludes = new HashSet<string>(Excludes.GetDirectories());
-
-                return includes
-                    .Except(excludes)
+                return includes.Except(excludes)
+                    .Distinct()
                     .OrderBy(p => p)
                     .Select(p => new DirectoryViewModel(p))
                     .ToArray();
@@ -331,6 +333,20 @@ namespace FS
         private bool CanToggle()
         {
             return true;
+        }
+
+        private async Task Exclude(CancellationToken token)
+        {
+            await Excludes.Add(new Pattern(SelectedItem.FullPath));
+            await Remove();
+        }
+
+        private bool CanExclude()
+        {
+            return !IsBusy
+                && SelectedItem != null
+                && !string.IsNullOrWhiteSpace(SelectedItem.FullPath)
+                && !Excludes.Items.Any(p => p.Value.Equals(SelectedItem.FullPath));
         }
     }
 }

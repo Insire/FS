@@ -6,6 +6,7 @@
                     xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
     <local:ConsoleColorConverter x:Key="ConsoleColorConverter" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
         <DockPanel>
@@ -48,7 +49,7 @@
             <Button Grid.Row="0"
                     Grid.Column="2"
                     Command="{Binding AddCommand}"
-                    Content="{mah:PackIconFontAwesome Kind=Plus}"
+                    Content="{mah:FontAwesome Kind=PlusSolid}"
                     ToolTip="Add" />
 
             <ListBox Grid.Row="2"
@@ -56,6 +57,14 @@
                      ItemsSource="{Binding Items}"
                      SelectedItem="{Binding SelectedItem}"
                      SelectionMode="Extended">
+                <ListBox.ToolTip>
+                    <ToolTip>
+                        <TextBlock>
+                            <Run Text="{Binding Count, Mode=OneWay}" />
+                            <Run Text=" Entries" />
+                        </TextBlock>
+                    </ToolTip>
+                </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
                     <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
@@ -65,15 +74,15 @@
                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
                         <MenuItem Command="{Binding AddCommand}"
                                   Header="Add"
-                                  Icon="{mah:PackIconFontAwesome Kind=Plus}"
+                                  Icon="{mah:FontAwesome Kind=PlusSolid}"
                                   ToolTip="Add" />
                         <MenuItem Command="{Binding RemoveRangeCommand}"
                                   Header="Remove"
-                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                  Icon="{mah:FontAwesome Kind=MinusSolid}"
                                   ToolTip="Remove" />
                         <MenuItem Command="{Binding ClearCommand}"
                                   Header="Clear"
-                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  Icon="{mah:FontAwesome Kind=TrashSolid}"
                                   ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
@@ -105,7 +114,7 @@
             <Grid.ContextMenu>
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
                     <MenuItem Command="{Binding ToggleCommand}"
-                              Header="Deactivate"
+                              Header="Stop Sync"
                               IsCheckable="True"
                               IsChecked="{Binding IsActive, Mode=OneWay}" />
                 </ContextMenu>
@@ -117,6 +126,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="4" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <local:CountDown Grid.Row="0"
@@ -128,17 +139,22 @@
                          Minimum="{Binding Progress.Minimum}"
                          Value="{Binding Progress.Value}" />
 
-            <ScrollViewer Grid.Row="4"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto">
-                <ItemsControl Background="Black" ItemsSource="{Binding Log.Items}">
+            <Expander Grid.Row="4" Header="{Binding Log.Count, StringFormat={}Log: {0}}">
+                <ItemsControl ItemsSource="{Binding Log.Items}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel VirtualizationMode="Recycling" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
-            </ScrollViewer>
+            </Expander>
+
+            <Button Grid.Row="6" Command="{Binding ToggleCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontAwesome Kind="StopSolid" />
+                    <TextBlock Margin="4,0" Text="Stop Sync" />
+                </StackPanel>
+            </Button>
         </Grid>
     </DataTemplate>
 
@@ -159,7 +175,7 @@
                               ToolTip="Activate" />
                     <MenuItem Command="{Binding SyncCommand}"
                               Header="Sync"
-                              Icon="{mah:PackIconFontAwesome Kind=Play}"
+                              Icon="{mah:FontAwesome Kind=PlaySolid}"
                               ToolTip="Sync" />
                 </ContextMenu>
             </Grid.ContextMenu>
@@ -172,18 +188,25 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="4" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="4" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="4" />
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="4" />
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0"
                   Grid.Column="0"
                   Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="4" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="4" />
                     <ColumnDefinition Width="*" />
@@ -199,74 +222,112 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="4" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="4" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0"
                            Grid.Column="0"
+                           VerticalAlignment="Center"
                            Text="Name:" />
                 <TextBox Grid.Row="0"
                          Grid.Column="2"
+                         Grid.ColumnSpan="5"
                          Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Grid.Row="2"
                            Grid.Column="0"
+                           VerticalAlignment="Center"
                            Text="Source:" />
                 <TextBox Grid.Row="2"
                          Grid.Column="2"
+                         Grid.ColumnSpan="5"
                          Text="{Binding Root, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
+                           VerticalAlignment="Center"
                            Text="Destination:" />
                 <TextBox Grid.Row="4"
                          Grid.Column="2"
+                         Grid.ColumnSpan="5"
                          Text="{Binding TargetDirectory}" />
 
                 <TextBlock Grid.Row="6"
                            Grid.Column="0"
+                           VerticalAlignment="Center"
                            Text="Interval:" />
                 <TextBox Grid.Row="6"
                          Grid.Column="2"
                          Text="{Binding IntervalInput, UpdateSourceTrigger=PropertyChanged}" />
 
-                <TextBlock Grid.Row="8"
-                           Grid.Column="0"
-                           Text="Interval:" />
-                <ComboBox Grid.Row="8"
-                          Grid.Column="2"
+                <TextBlock Grid.Row="6"
+                           Grid.Column="4"
+                           VerticalAlignment="Center"
+                           Text="in" />
+                <ComboBox Grid.Row="6"
+                          Grid.Column="6"
                           ItemsSource="{Binding Source={mvvm:EnumBindingSource {x:Type local:IntervalType}}}"
                           SelectedItem="{Binding IntervalType}" />
 
-                <GroupBox Grid.Row="10"
-                          Grid.Column="0"
-                          Grid.ColumnSpan="3"
-                          Header="Settings:">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
-                        <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
-                        <CheckBox Content="DeleteRightOnlyFiles" IsChecked="{Binding DeleteRightOnlyFiles}" />
-                        <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
-                        <CheckBox Content="DeleteRightOnlyDirectories" IsChecked="{Binding DeleteRightOnlyDirectories}" />
-                        <CheckBox Content="DeleteSameFiles" IsChecked="{Binding DeleteSameFiles}" />
-                        <CheckBox Content="DeleteChangedFiles" IsChecked="{Binding DeleteChangedFiles}" />
-                    </StackPanel>
-                </GroupBox>
+                <TextBlock Grid.Row="8"
+                           Grid.Column="0"
+                           Text="Settings:" />
+
+                <StackPanel Grid.Row="8"
+                            Grid.Column="2"
+                            Orientation="Vertical">
+                    <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
+                    <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
+                    <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="8"
+                            Grid.Column="6"
+                            Orientation="Vertical">
+                    <CheckBox Content="DeleteRightOnlyFiles" IsChecked="{Binding DeleteRightOnlyFiles}" />
+                    <CheckBox Content="DeleteRightOnlyDirectories" IsChecked="{Binding DeleteRightOnlyDirectories}" />
+                    <CheckBox Content="DeleteSameFiles" IsChecked="{Binding DeleteSameFiles}" />
+                    <CheckBox Content="DeleteChangedFiles" IsChecked="{Binding DeleteChangedFiles}" />
+                </StackPanel>
             </Grid>
 
-            <ContentControl Grid.Row="2"
+            <Rectangle Grid.Row="2"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="4"
+                       Height="4"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Center"
+                       Fill="LightGray" />
+
+            <TextBlock Grid.Row="4"
+                       Grid.Column="0"
+                       Text="Includes:" />
+
+            <ContentControl Grid.Row="6"
                             Grid.Column="0"
                             Content="{Binding Includes}" />
-            <ContentControl Grid.Row="2"
+
+            <TextBlock Grid.Row="4"
+                       Grid.Column="2"
+                       Text="Excludes:" />
+            <ContentControl Grid.Row="6"
                             Grid.Column="2"
                             Content="{Binding Excludes}" />
 
-            <ListBox Grid.Row="4"
+            <ListBox Grid.Row="8"
                      Grid.Column="0"
                      Grid.ColumnSpan="5"
+                     SelectedItem="{Binding SelectedItem}"
                      ItemsSource="{Binding Items}"
-                     SelectionMode="Multiple">
+                     SelectionMode="Extended">
+
+                <ListBox.ToolTip>
+                    <ToolTip>
+                        <TextBlock>
+                            <Run Text="{Binding Count, Mode=OneWay}" />
+                            <Run Text=" Directories" />
+                        </TextBlock>
+                    </ToolTip>
+                </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
                     <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
@@ -276,23 +337,45 @@
                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
                         <MenuItem Command="{Binding RefreshCommand}"
                                   Header="Refresh"
-                                  Icon="{mah:PackIconFontAwesome Kind=History}"
+                                  Icon="{mah:FontAwesome Kind=HistorySolid}"
                                   ToolTip="Refresh" />
-                        <MenuItem Command="{Binding RemoveRangeCommand}"
-                                  Header="Remove"
-                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
-                                  ToolTip="Remove" />
+                        <MenuItem Command="{Binding ExcludeCommand}"
+                                  Header="Exclude"
+                                  Icon="{mah:FontAwesome Kind=TimesSolid}"
+                                  ToolTip="Exclude" />
                         <MenuItem Command="{Binding ClearCommand}"
                                   Header="Clear"
-                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  Icon="{mah:FontAwesome Kind=TrashSolid}"
                                   ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
             </ListBox>
 
-            <TextBlock Grid.Row="6"
-                       Grid.Column="0"
-                       Text="{Binding Count}" />
+            <Button Grid.Row="10"
+                    Grid.ColumnSpan="3"
+                    Command="{Binding ToggleCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <mah:FontAwesome Kind="PlaySolid" />
+                    <TextBlock Margin="4,0" Text="Start Sync" />
+                </StackPanel>
+            </Button>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NoSelectedDirectoriesViewModelTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="There is nothing selected yet." TextWrapping="Wrap" />
         </Grid>
     </DataTemplate>
 
@@ -314,23 +397,6 @@
         </ContentControl>
     </DataTemplate>
 
-    <DataTemplate x:Key="NoSelectedDirectoriesViewModelTemplate" DataType="{x:Type local:DirectoriesViewModel}">
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="There is nothing selected yet." TextWrapping="Wrap" />
-        </Grid>
-    </DataTemplate>
-
     <DataTemplate x:Key="EmptySyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
@@ -347,7 +413,7 @@
             <StackPanel>
                 <Button Command="{Binding AddCommand}" ToolTip="Add">
                     <StackPanel Orientation="Horizontal">
-                        <mah:PackIconFontAwesome Kind="Plus" />
+                        <mah:FontAwesome Kind="PlusSolid" />
                         <TextBlock Text="Add" />
                     </StackPanel>
                 </Button>
@@ -367,31 +433,47 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="4" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
+            <Grid.Resources>
+                <mvvm:BindingProxy x:Key="DataContextProxy" Data="{Binding}" />
+            </Grid.Resources>
 
             <ListBox Grid.Row="0"
                      Grid.Column="0"
+                     HorizontalContentAlignment="Stretch"
+                     BorderThickness="1"
                      ItemsSource="{Binding Items}"
                      SelectedItem="{Binding SelectedItem}"
                      SelectionMode="Extended">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="4" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
-                            <DockPanel Grid.Column="2">
-                                <mah:PackIconFontAwesome Kind="Check" ToolTip="IsActive" />
-                                <TextBlock Text="{Binding Count}" />
-                            </DockPanel>
-                        </Grid>
+                        <DockPanel LastChildFill="True">
+                            <TextBlock VerticalAlignment="Center"
+                                       DockPanel.Dock="Right"
+                                       Text="{Binding Count}" />
+                            <Viewbox Height="16"
+                                     Margin="4,0"
+                                     DockPanel.Dock="Right">
+                                <local:BusyAnimation Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Viewbox>
+
+                            <TextBlock VerticalAlignment="Center"
+                                       DockPanel.Dock="Left"
+                                       Text="{Binding Name}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </DockPanel>
                     </DataTemplate>
                 </ListBox.Resources>
+
+                <ListBox.ToolTip>
+                    <ToolTip>
+                        <TextBlock>
+                            <Run Text="{Binding Count, Mode=OneWay}" />
+                            <Run Text=" Synchronizations" />
+                        </TextBlock>
+                    </ToolTip>
+                </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
                     <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
@@ -403,10 +485,24 @@
                             <Setter.Value>
                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
                                     <MenuItem Command="{Binding ToggleCommand}"
-                                              Header="Toggle Activation"
                                               IsCheckable="True"
                                               IsChecked="{Binding IsActive, Mode=OneWay}"
-                                              ToolTip="Toogle Activation" />
+                                              ToolTip="{Binding Header, RelativeSource={x:Static RelativeSource.Self}}">
+                                        <MenuItem.Style>
+                                            <Style TargetType="{x:Type MenuItem}">
+                                                <Setter Property="Header" Value="Start Sync" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Header" Value="Stop Sync" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </MenuItem.Style>
+                                    </MenuItem>
+                                    <MenuItem Command="{Binding Data.RemoveCommand, Source={StaticResource DataContextProxy}}"
+                                              Header="Remove"
+                                              Icon="{mah:FontAwesome Kind=MinusSolid}"
+                                              ToolTip="Remove" />
                                 </ContextMenu>
                             </Setter.Value>
                         </Setter>
@@ -418,27 +514,23 @@
 
                         <MenuItem Command="{Binding AddCommand}"
                                   Header="Add"
-                                  Icon="{mah:PackIconFontAwesome Kind=Plus}"
+                                  Icon="{mah:FontAwesome Kind=PlusSolid}"
                                   ToolTip="Add" />
                         <MenuItem Command="{Binding RefreshCommand}"
                                   Header="Refresh"
-                                  Icon="{mah:PackIconFontAwesome Kind=History}"
+                                  Icon="{mah:FontAwesome Kind=HistorySolid}"
                                   ToolTip="Refresh" />
                         <MenuItem Command="{Binding RemoveRangeCommand}"
                                   Header="Remove"
-                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                  Icon="{mah:FontAwesome Kind=MinusSolid}"
                                   ToolTip="Remove" />
                         <MenuItem Command="{Binding ClearCommand}"
                                   Header="Clear"
-                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  Icon="{mah:FontAwesome Kind=TrashSolid}"
                                   ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
             </ListBox>
-
-            <TextBlock Grid.Row="2"
-                       Grid.Column="0"
-                       Text="{Binding Count}" />
 
             <Rectangle Grid.Row="0"
                        Grid.Column="2"
