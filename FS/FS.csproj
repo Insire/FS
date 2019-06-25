@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Controls\BusyAnimation.xaml" />
     <None Remove="CountDown.xaml" />
     <None Remove="Resources\Styles.xaml" />
   </ItemGroup>

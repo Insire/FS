@@ -173,13 +173,22 @@ namespace FS
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
-            var root = new DirectoryInfo(Root);
+            var items = await Task.Run(() =>
+            {
+                var root = new DirectoryInfo(Root);
 
-            var directories = Includes.GetDirectories();
-            var includes = new HashSet<string>(Includes.GetDirectories());
-            var excludes = new HashSet<string>(Excludes.GetDirectories());
+                var directories = Includes.GetDirectories();
+                var includes = new HashSet<string>(Includes.GetDirectories());
+                var excludes = new HashSet<string>(Excludes.GetDirectories());
 
-            await AddRange(includes.Except(excludes).OrderBy(p => p).Select(p => new DirectoryViewModel(CommandBuilder, p))).ConfigureAwait(false);
+                return includes
+                    .Except(excludes)
+                    .OrderBy(p => p)
+                    .Select(p => new DirectoryViewModel(CommandBuilder, p))
+                    .ToArray();
+            }).ConfigureAwait(false);
+
+            await AddRange(items).ConfigureAwait(false);
         }
 
         private async Task Synchronize(CancellationToken token)

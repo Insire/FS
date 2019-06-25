@@ -54,6 +54,11 @@
                      ItemsSource="{Binding Items}"
                      SelectedItem="{Binding SelectedItem}"
                      SelectionMode="Extended">
+
+                <i:Interaction.Behaviors>
+                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                </i:Interaction.Behaviors>
+
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
                         <MenuItem Command="{Binding AddCommand}"
@@ -70,10 +75,27 @@
                                   ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
-                <i:Interaction.Behaviors>
-                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
-                </i:Interaction.Behaviors>
             </ListBox>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DirectoriesBusyTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <local:BusyAnimation />
+                <TextBlock Text="Fetching data..." />
+            </StackPanel>
         </Grid>
     </DataTemplate>
 
@@ -81,7 +103,10 @@
         <Grid>
             <Grid.ContextMenu>
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                    <MenuItem Command="{Binding ToggleCommand}" Header="Deactivate" />
+                    <MenuItem Command="{Binding ToggleCommand}"
+                              Header="Deactivate"
+                              IsCheckable="True"
+                              IsChecked="{Binding IsActive, Mode=OneWay}" />
                 </ContextMenu>
             </Grid.ContextMenu>
 
@@ -179,7 +204,7 @@
                            Text="Source:" />
                 <TextBox Grid.Row="2"
                          Grid.Column="2"
-                         Text="{Binding Root}" />
+                         Text="{Binding Root, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Grid.Row="4"
                            Grid.Column="0"
@@ -266,6 +291,9 @@
                 <Style TargetType="{x:Type ContentControl}">
                     <Setter Property="ContentTemplate" Value="{StaticResource DirectoriesConfigTemplate}" />
                     <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                            <Setter Property="ContentTemplate" Value="{StaticResource DirectoriesBusyTemplate}" />
+                        </DataTrigger>
                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                             <Setter Property="ContentTemplate" Value="{StaticResource DirectoriesActiveTemplate}" />
                         </DataTrigger>
@@ -275,19 +303,52 @@
         </ContentControl>
     </DataTemplate>
 
-    <DataTemplate DataType="{x:Type local:SyncsViewModel}">
-        <Grid>
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Unloaded">
-                    <i:InvokeCommandAction Command="{Binding UnloadCommand}" />
-                </i:EventTrigger>
-                <i:EventTrigger EventName="Loaded">
-                    <i:InvokeCommandAction Command="{Binding LoadCommand}" />
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-
+    <DataTemplate x:Key="EmptySyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.5*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <Button Command="{Binding AddCommand}" ToolTip="Add">
+                    <StackPanel Orientation="Horizontal">
+                        <mah:PackIconFontAwesome Kind="Plus" />
+                        <TextBlock Text="Add" />
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="There is nothing here yet, add a new sync?" TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="NoSelectedDirectoriesViewModelTemplate" DataType="{x:Type local:DirectoriesViewModel}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="There is nothing selected yet." TextWrapping="Wrap" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultSyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.33*" />
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="4" />
@@ -299,111 +360,109 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <ContentControl Grid.Row="0" Grid.Column="0">
-                <ContentControl.Style>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Content">
+            <ListBox Grid.Row="0"
+                     Grid.Column="0"
+                     ItemsSource="{Binding Items}"
+                     SelectedItem="{Binding SelectedItem}"
+                     SelectionMode="Extended">
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListBox.Resources>
+
+                <i:Interaction.Behaviors>
+                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                </i:Interaction.Behaviors>
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}">
+                        <Setter Property="ContextMenu">
                             <Setter.Value>
-                                <ListBox IsEnabled="{Binding IsBusy}"
-                                         ItemsSource="{Binding Items}"
-                                         SelectedItem="{Binding SelectedItem}"
-                                         SelectionMode="Extended">
-                                    <ListBox.Resources>
-                                        <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
-                                            <TextBlock Text="{Binding Name}" />
-                                        </DataTemplate>
-                                    </ListBox.Resources>
-
-                                    <i:Interaction.Behaviors>
-                                        <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
-                                    </i:Interaction.Behaviors>
-
-                                    <ListBox.ItemContainerStyle>
-                                        <Style TargetType="{x:Type ListBoxItem}">
-                                            <Setter Property="ContextMenu">
-                                                <Setter.Value>
-                                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                                        <MenuItem Command="{Binding ToggleCommand}"
-                                                                  Header="Toggle Activation"
-                                                                  IsCheckable="True"
-                                                                  IsChecked="{Binding IsActive, Mode=OneWay}"
-                                                                  ToolTip="Toogle Activation" />
-                                                    </ContextMenu>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </ListBox.ItemContainerStyle>
-
-                                    <ListBox.ContextMenu>
-                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-
-                                            <MenuItem Command="{Binding AddCommand}"
-                                                      Header="Add"
-                                                      Icon="{mah:PackIconFontAwesome Kind=Plus}"
-                                                      ToolTip="Add" />
-                                            <MenuItem Command="{Binding RefreshCommand}"
-                                                      Header="Refresh"
-                                                      Icon="{mah:PackIconFontAwesome Kind=History}"
-                                                      ToolTip="Refresh" />
-                                            <MenuItem Command="{Binding RemoveRangeCommand}"
-                                                      Header="Remove"
-                                                      Icon="{mah:PackIconFontAwesome Kind=Minus}"
-                                                      ToolTip="Remove" />
-                                            <MenuItem Command="{Binding ClearCommand}"
-                                                      Header="Clear"
-                                                      Icon="{mah:PackIconFontAwesome Kind=Trash}"
-                                                      ToolTip="Clear" />
-                                        </ContextMenu>
-                                    </ListBox.ContextMenu>
-                                </ListBox>
+                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                                    <MenuItem Command="{Binding ToggleCommand}"
+                                              Header="Toggle Activation"
+                                              IsCheckable="True"
+                                              IsChecked="{Binding IsActive, Mode=OneWay}"
+                                              ToolTip="Toogle Activation" />
+                                </ContextMenu>
                             </Setter.Value>
                         </Setter>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Count}" Value="0">
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="*" />
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="*" />
-                                            </Grid.RowDefinitions>
-
-                                            <StackPanel>
-                                                <Button Command="{Binding AddCommand}"
-                                                        Content="{mah:PackIconFontAwesome Kind=Plus}"
-                                                        ToolTip="Add" />
-                                                <TextBlock Text="There is nothing here yet, add a new sync?" TextWrapping="Wrap" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Setter.Value>
-                                </Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
                     </Style>
-                </ContentControl.Style>
-            </ContentControl>
+                </ListBox.ItemContainerStyle>
+
+                <ListBox.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+
+                        <MenuItem Command="{Binding AddCommand}"
+                                  Header="Add"
+                                  Icon="{mah:PackIconFontAwesome Kind=Plus}"
+                                  ToolTip="Add" />
+                        <MenuItem Command="{Binding RefreshCommand}"
+                                  Header="Refresh"
+                                  Icon="{mah:PackIconFontAwesome Kind=History}"
+                                  ToolTip="Refresh" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}"
+                                  Header="Remove"
+                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                  ToolTip="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}"
+                                  Header="Clear"
+                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  ToolTip="Clear" />
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+            </ListBox>
 
             <TextBlock Grid.Row="2"
                        Grid.Column="0"
                        Text="{Binding Count}" />
 
-            <GridSplitter Grid.Row="0"
-                          Grid.Column="2"
-                          Width="4"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch" />
+            <Rectangle Grid.Row="0"
+                       Grid.Column="2"
+                       Width="4"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Stretch"
+                       Fill="LightGray" />
 
             <ContentControl Grid.Row="0"
                             Grid.RowSpan="3"
                             Grid.Column="4"
-                            Content="{Binding SelectedItem}" />
+                            Content="{Binding SelectedItem}">
+                <ContentControl.Style>
+                    <Style TargetType="{x:Type ContentControl}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem}" Value="{x:Null}">
+                                <Setter Property="ContentTemplate" Value="{StaticResource NoSelectedDirectoriesViewModelTemplate}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
         </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type local:SyncsViewModel}">
+        <ContentControl Content="{Binding}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Unloaded">
+                    <i:InvokeCommandAction Command="{Binding UnloadCommand}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="Loaded">
+                    <i:InvokeCommandAction Command="{Binding LoadCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <ContentControl.Style>
+                <Style TargetType="{x:Type ContentControl}">
+                    <Setter Property="ContentTemplate" Value="{StaticResource DefaultSyncViewModelTemplate}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Count}" Value="0">
+                            <Setter Property="ContentTemplate" Value="{StaticResource EmptySyncViewModelTemplate}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:MainViewModel}">
