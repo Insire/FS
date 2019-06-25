@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                     xmlns:local="clr-namespace:FS"
-                    xmlns:mah="clr-namespace:MahApps.Metro.IconPacks;assembly=MahApps.Metro.IconPacks.FontAwesome"
+                    xmlns:mah="http://metro.mahapps.com/winfx/xaml/iconpacks"
                     xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
@@ -46,7 +46,8 @@
             <Button Grid.Row="0"
                     Grid.Column="2"
                     Command="{Binding AddCommand}"
-                    Content="Add" />
+                    Content="{mah:PackIconFontAwesome Kind=Plus}"
+                    ToolTip="Add" />
 
             <ListBox Grid.Row="2"
                      Grid.Column="0"
@@ -55,9 +56,18 @@
                      SelectionMode="Extended">
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                        <MenuItem Command="{Binding AddCommand}" Header="Add" />
-                        <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
-                        <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+                        <MenuItem Command="{Binding AddCommand}"
+                                  Header="Add"
+                                  Icon="{mah:PackIconFontAwesome Kind=Plus}"
+                                  ToolTip="Add" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}"
+                                  Header="Remove"
+                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                  ToolTip="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}"
+                                  Header="Clear"
+                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <i:Interaction.Behaviors>
@@ -106,8 +116,15 @@
 
             <Grid.ContextMenu>
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                    <MenuItem Command="{Binding ToggleCommand}" Header="Activate" />
-                    <MenuItem Command="{Binding SyncCommand}" Header="Sync" />
+                    <MenuItem Command="{Binding ToggleCommand}"
+                              Header="Activate"
+                              IsCheckable="True"
+                              IsChecked="{Binding IsActive, Mode=OneWay}"
+                              ToolTip="Activate" />
+                    <MenuItem Command="{Binding SyncCommand}"
+                              Header="Sync"
+                              Icon="{mah:PackIconFontAwesome Kind=Play}"
+                              ToolTip="Sync" />
                 </ContextMenu>
             </Grid.ContextMenu>
 
@@ -221,9 +238,18 @@
 
                 <ListBox.ContextMenu>
                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                        <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" />
-                        <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
-                        <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+                        <MenuItem Command="{Binding RefreshCommand}"
+                                  Header="Refresh"
+                                  Icon="{mah:PackIconFontAwesome Kind=History}"
+                                  ToolTip="Refresh" />
+                        <MenuItem Command="{Binding RemoveRangeCommand}"
+                                  Header="Remove"
+                                  Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                  ToolTip="Remove" />
+                        <MenuItem Command="{Binding ClearCommand}"
+                                  Header="Clear"
+                                  Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                  ToolTip="Clear" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
             </ListBox>
@@ -278,7 +304,8 @@
                     <Style TargetType="ContentControl">
                         <Setter Property="Content">
                             <Setter.Value>
-                                <ListBox ItemsSource="{Binding Items}"
+                                <ListBox IsEnabled="{Binding IsBusy}"
+                                         ItemsSource="{Binding Items}"
                                          SelectedItem="{Binding SelectedItem}"
                                          SelectionMode="Extended">
                                     <ListBox.Resources>
@@ -291,13 +318,41 @@
                                         <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
                                     </i:Interaction.Behaviors>
 
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListBoxItem}">
+                                            <Setter Property="ContextMenu">
+                                                <Setter.Value>
+                                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
+                                                        <MenuItem Command="{Binding ToggleCommand}"
+                                                                  Header="Toggle Activation"
+                                                                  IsCheckable="True"
+                                                                  IsChecked="{Binding IsActive, Mode=OneWay}"
+                                                                  ToolTip="Toogle Activation" />
+                                                    </ContextMenu>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+
                                     <ListBox.ContextMenu>
                                         <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                            <MenuItem Command="{Binding SelectedItem.ToggleCommand}" Header="Toggle Activation" />
-                                            <MenuItem Command="{Binding AddCommand}" Header="Add" />
-                                            <MenuItem Command="{Binding RefreshCommand}" Header="Refresh" />
-                                            <MenuItem Command="{Binding RemoveRangeCommand}" Header="Remove" />
-                                            <MenuItem Command="{Binding ClearCommand}" Header="Clear" />
+
+                                            <MenuItem Command="{Binding AddCommand}"
+                                                      Header="Add"
+                                                      Icon="{mah:PackIconFontAwesome Kind=Plus}"
+                                                      ToolTip="Add" />
+                                            <MenuItem Command="{Binding RefreshCommand}"
+                                                      Header="Refresh"
+                                                      Icon="{mah:PackIconFontAwesome Kind=History}"
+                                                      ToolTip="Refresh" />
+                                            <MenuItem Command="{Binding RemoveRangeCommand}"
+                                                      Header="Remove"
+                                                      Icon="{mah:PackIconFontAwesome Kind=Minus}"
+                                                      ToolTip="Remove" />
+                                            <MenuItem Command="{Binding ClearCommand}"
+                                                      Header="Clear"
+                                                      Icon="{mah:PackIconFontAwesome Kind=Trash}"
+                                                      ToolTip="Clear" />
                                         </ContextMenu>
                                     </ListBox.ContextMenu>
                                 </ListBox>
@@ -320,7 +375,9 @@
                                             </Grid.RowDefinitions>
 
                                             <StackPanel>
-                                                <Button Command="{Binding AddCommand}" Content="{mah:FontAwesome Kind=PlusSolid}" />
+                                                <Button Command="{Binding AddCommand}"
+                                                        Content="{mah:PackIconFontAwesome Kind=Plus}"
+                                                        ToolTip="Add" />
                                                 <TextBlock Text="There is nothing here yet, add a new sync?" TextWrapping="Wrap" />
                                             </StackPanel>
                                         </Grid>

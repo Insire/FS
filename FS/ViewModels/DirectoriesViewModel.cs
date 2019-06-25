@@ -161,7 +161,7 @@ namespace FS
             Log = new LogViewModel(commandBuilder);
 
             SyncCommand = commandBuilder
-                .Create(Sync, CanSync)
+                .Create(Synchronize, CanSync)
                 .WithSingleExecution(CommandManager)
                 .Build();
 
@@ -182,7 +182,7 @@ namespace FS
             await AddRange(includes.Except(excludes).OrderBy(p => p).Select(p => new DirectoryViewModel(CommandBuilder, p))).ConfigureAwait(false);
         }
 
-        private async Task Sync(CancellationToken token)
+        private async Task Synchronize(CancellationToken token)
         {
             using (BusyStack.GetToken())
             {
@@ -276,7 +276,7 @@ namespace FS
 #pragma warning disable RCS1163 // Unused parameter.
             async void Callback(object state)
             {
-                await Sync(CancellationToken.None).ConfigureAwait(false);
+                await Synchronize(CancellationToken.None).ConfigureAwait(false);
                 await UpdateExecution().ConfigureAwait(false);
             }
 #pragma warning restore RCS1163 // Unused parameter.
@@ -291,7 +291,7 @@ namespace FS
 
         private bool CanToggle()
         {
-            return !IsBusy;
+            return true;
         }
     }
 }

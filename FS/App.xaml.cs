@@ -23,7 +23,7 @@ namespace FS
         protected override async void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            await ExitService.Default.ShutDown();
+            await ExitService.Default.ShutDown().ConfigureAwait(false);
             BlobCache.Shutdown().Wait();
         }
     }
