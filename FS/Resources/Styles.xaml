@@ -92,10 +92,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="1" Grid.Column="1">
-                <local:BusyAnimation />
-                <TextBlock Text="Fetching data..." />
-            </StackPanel>
+            <local:BusyAnimation Grid.Row="1"
+                                 Grid.Column="1"
+                                 Text="Fetching data..." />
         </Grid>
     </DataTemplate>
 
