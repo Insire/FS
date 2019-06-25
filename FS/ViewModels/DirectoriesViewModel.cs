@@ -14,6 +14,7 @@ namespace FS
     public sealed class DirectoriesViewModel : BusinessViewModelListBase<DirectoryViewModel>
     {
         private readonly IProgress<int> _progress;
+
         private bool _syncInProgress;
         private Timer _timer;
 
@@ -158,7 +159,9 @@ namespace FS
         }
 
         public ICommand ExcludeCommand { get; }
-        public ICommand SyncCommand { get; }
+
+        private readonly ConcurrentCommandBase _syncCommand;
+        public ICommand SyncCommand => _syncCommand;
         public ICommand ToggleCommand { get; }
 
         public DirectoriesViewModel(ICommandBuilder commandBuilder)
@@ -172,9 +175,10 @@ namespace FS
             Progress = new ProgressViewModel(progress);
             Log = new LogViewModel(commandBuilder);
 
-            SyncCommand = commandBuilder
+            _syncCommand = commandBuilder
                 .Create(Synchronize, CanSync)
                 .WithSingleExecution(CommandManager)
+                .WithCancellation()
                 .Build();
 
             ToggleCommand = commandBuilder
@@ -207,20 +211,25 @@ namespace FS
 
         private async Task Synchronize(CancellationToken token)
         {
-            _syncInProgress = true;
-
-            using (BusyStack.GetToken())
+            try
             {
-                Progress.Minimum = 0;
-                Progress.Maximum = Items.Count;
-                Progress.Value = 0;
+                _syncInProgress = true;
 
-                await Refresh(token).ConfigureAwait(false);
-                await Log.Clear(token).ConfigureAwait(false);
-                await Items.ForEachAsync(p => Task.Run(() => SyncDirectory(p.FullPath))).ConfigureAwait(false);
+                using (BusyStack.GetToken())
+                {
+                    Progress.Minimum = 0;
+                    Progress.Maximum = Items.Count;
+                    Progress.Value = 0;
+
+                    await Refresh(token).ConfigureAwait(false);
+                    await Log.Clear(token).ConfigureAwait(false);
+                    await Items.ForEachAsync(p => Task.Run(() => SyncDirectory(p.FullPath), token), 1).ConfigureAwait(false);
+                }
             }
-
-            _syncInProgress = false;
+            finally
+            {
+                _syncInProgress = false;
+            }
         }
 
         private void SyncDirectory(string path)
@@ -303,6 +312,7 @@ namespace FS
                 }
                 else
                 {
+                    _syncCommand.CancelCommand.Execute(null);
                     _timer.Dispose();
                     _timer = null;
                 }
