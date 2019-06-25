@@ -1,6 +1,3 @@
 [submodule "ContentSync"]
 	path = ContentSync
 	url = https://github.com/Insire/ContentSync.git
-[submodule "MahApps.Metro.IconPacks"]
-	path = MahApps.Metro.IconPacks
-	url = https://github.com/Insire/MahApps.Metro.IconPacks.git
