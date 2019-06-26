@@ -1,9 +1,10 @@
-﻿using MvvmScarletToolkit.Observables;
+﻿using MvvmScarletToolkit.Abstractions;
+using MvvmScarletToolkit.Observables;
 using System;
 
 namespace FS
 {
-    public class ProgressViewModel : ObservableObject, IDisposable
+    public class ProgressViewModel : ViewModelBase, IDisposable
     {
         private readonly Progress<int> _progress;
 
@@ -28,15 +29,16 @@ namespace FS
             set { SetValue(ref _value, value); }
         }
 
-        public ProgressViewModel(Progress<int> progress)
+        public ProgressViewModel(ICommandBuilder commandBuilder, Progress<int> progress)
+            : base(commandBuilder)
         {
             _progress = progress ?? throw new ArgumentNullException(nameof(progress));
             _progress.ProgressChanged += ProgressChanged;
         }
 
-        private void ProgressChanged(object sender, int e)
+        private async void ProgressChanged(object sender, int e)
         {
-            Value += e;
+            await Dispatcher.Invoke(() => Value += e).ConfigureAwait(false);
         }
 
         public void Dispose()

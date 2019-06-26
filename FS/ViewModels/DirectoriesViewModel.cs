@@ -172,7 +172,7 @@ namespace FS
 
             Excludes = new Patterns(commandBuilder, this);
             Includes = new Patterns(commandBuilder, this);
-            Progress = new ProgressViewModel(progress);
+            Progress = new ProgressViewModel(commandBuilder, progress);
             Log = new LogViewModel(commandBuilder);
 
             _syncCommand = commandBuilder

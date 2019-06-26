@@ -139,7 +139,14 @@
                          Minimum="{Binding Progress.Minimum}"
                          Value="{Binding Progress.Value}" />
 
-            <Expander Grid.Row="4" Header="{Binding Log.Count, StringFormat={}Log: {0}}">
+            <Expander Grid.Row="4">
+                <Expander.Header>
+                    <TextBlock>
+                        <Run Text="Log:" />
+                        <Run Text="{Binding Log.Count, Mode=OneWay}" />
+                        <Run Text="Entries" />
+                    </TextBlock>
+                </Expander.Header>
                 <ScrollViewer>
                     <ItemsControl ItemsSource="{Binding Log.Items}">
                         <ItemsControl.ItemsPanel>
