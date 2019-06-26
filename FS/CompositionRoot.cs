@@ -24,6 +24,7 @@ namespace FS
             c.UseInstance(typeof(IScarletCommandManager), ScarletCommandManager.Default);
             c.UseInstance(typeof(IScarletDispatcher), ScarletDispatcher.Default);
             c.UseInstance(typeof(IExitService), ExitService.Default);
+            c.UseInstance(typeof(IScarletMessenger), ScarletMessenger.Default);
 
             return c;
         }

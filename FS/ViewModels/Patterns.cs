@@ -36,6 +36,8 @@ namespace FS
                 .Create(Add, CanAdd)
                 .WithSingleExecution(CommandManager)
                 .Build();
+
+            Messenger.Subscribe<ViewModelListBaseSelectionChanged<Pattern>>(OnSelectionChanged, OnSelectionChangedReceived);
         }
 
         private async Task Add(CancellationToken token)
@@ -65,6 +67,19 @@ namespace FS
                 .Select(p => root.GlobDirectories(p.Value))
                 .SelectMany(p => p)
                 .Select(p => p.FullName);
+        }
+
+        private void OnSelectionChanged(ViewModelListBaseSelectionChanged<Pattern> messasge)
+        {
+            if (string.IsNullOrEmpty(messasge?.Content?.Value))
+                return;
+
+            Content = messasge.Content.Value;
+        }
+
+        private bool OnSelectionChangedReceived(ViewModelListBaseSelectionChanged<Pattern> messasge)
+        {
+            return messasge.Sender.Equals(this);
         }
     }
 }
