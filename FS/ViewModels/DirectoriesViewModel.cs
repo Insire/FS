@@ -15,6 +15,7 @@ namespace FS
     public sealed class DirectoriesViewModel : BusinessViewModelListBase<DirectoryViewModel>
     {
         private readonly IProgress<int> _progress;
+        private readonly ConcurrentCommandBase _syncCommand;
 
         private bool _syncInProgress;
         private Timer _timer;
@@ -174,10 +175,8 @@ namespace FS
         }
 
         public ICommand ExcludeCommand { get; }
-
-        private readonly ConcurrentCommandBase _syncCommand;
+        public ICommand StartTimedSynchronizationCommand { get; }
         public ICommand SyncCommand => _syncCommand;
-        public ICommand ToggleCommand { get; }
 
         public DirectoriesViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
@@ -185,20 +184,23 @@ namespace FS
             var progress = new Progress<int>();
             _progress = progress;
 
+            Log = new LogViewModel(commandBuilder);
             Excludes = new Patterns(commandBuilder, this);
             Includes = new Patterns(commandBuilder, this);
             Progress = new ProgressViewModel(commandBuilder, progress, this);
-            Log = new LogViewModel(commandBuilder);
 
             _syncCommand = commandBuilder
                 .Create(Synchronize, CanSync)
                 .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
                 .WithCancellation()
                 .Build();
 
-            ToggleCommand = commandBuilder
-                .Create(Toggle, CanToggle)
+            StartTimedSynchronizationCommand = commandBuilder
+                .Create(StartTimedSynchronization, CanStartTimedSynchronization)
                 .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
+                .WithCancellation()
                 .Build();
 
             ExcludeCommand = commandBuilder
@@ -232,9 +234,9 @@ namespace FS
 
                 using (BusyStack.GetToken())
                 {
-                    await Refresh(token).ConfigureAwait(false);
                     await Progress.Reset().ConfigureAwait(false);
                     await Log.Clear(token).ConfigureAwait(false);
+                    await Refresh(token).ConfigureAwait(false);
                     await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
                 }
             }
@@ -315,23 +317,26 @@ namespace FS
             _timer.Change(TimeSpan.Zero, Interval);
         }
 
-        private async Task Toggle()
+        private async Task StartTimedSynchronization(CancellationToken token)
         {
+            token.Register(async () =>
+            {
+                _timer.Dispose();
+                _timer = null;
+                await Dispatcher.Invoke(() => IsActive = false).ConfigureAwait(false);
+            });
+
             using (BusyStack.GetToken())
             {
-                if (_timer is null)
+                try
                 {
                     _timer = new Timer(Callback, null, TimeSpan.Zero, Interval);
                 }
-                else
+                finally
                 {
-                    _syncCommand.CancelCommand.Execute(null);
-                    _timer.Dispose();
-                    _timer = null;
+                    await UpdateExecution().ConfigureAwait(false);
+                    await Dispatcher.Invoke(() => IsActive = true, token).ConfigureAwait(false);
                 }
-
-                await UpdateExecution().ConfigureAwait(false);
-                await Dispatcher.Invoke(() => IsActive = !IsActive).ConfigureAwait(false);
             }
 
 #pragma warning disable RCS1163 // Unused parameter.
@@ -340,7 +345,7 @@ namespace FS
                 if (_syncInProgress)
                     return;
 
-                await Synchronize(CancellationToken.None).ConfigureAwait(false);
+                await Synchronize(token).ConfigureAwait(false);
                 await UpdateExecution().ConfigureAwait(false);
             }
 #pragma warning restore RCS1163 // Unused parameter.
@@ -353,9 +358,9 @@ namespace FS
             }
         }
 
-        private bool CanToggle()
+        private bool CanStartTimedSynchronization()
         {
-            return true;
+            return _timer is null && CanSync();
         }
 
         private async Task Exclude(CancellationToken token)
@@ -369,8 +374,8 @@ namespace FS
                 .Trim('\\')
                 .Trim('/');
 
-            await Excludes.Add(new Pattern($"**/{pathWithOutRoot}"));
-            await Remove();
+            await Excludes.Add(new Pattern($"**/{pathWithOutRoot}")).ConfigureAwait(false);
+            await Remove().ConfigureAwait(false);
         }
 
         private bool CanExclude()

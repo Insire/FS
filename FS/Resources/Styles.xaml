@@ -113,7 +113,7 @@
         <Grid>
             <Grid.ContextMenu>
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                    <MenuItem Command="{Binding ToggleCommand}"
+                    <MenuItem Command="{Binding StartTimedSynchronizationCommand.CancelCommand}"
                               Header="Stop Sync"
                               IsCheckable="True"
                               IsChecked="{Binding IsActive, Mode=OneWay}" />
@@ -158,7 +158,7 @@
                 </ScrollViewer>
             </Expander>
 
-            <Button Grid.Row="6" Command="{Binding ToggleCommand}">
+            <Button Grid.Row="6" Command="{Binding StartTimedSynchronizationCommand.CancelCommand}">
                 <StackPanel Orientation="Horizontal">
                     <mah:FontAwesome Kind="StopSolid" />
                     <TextBlock Margin="4,0" Text="Stop Sync" />
@@ -177,7 +177,7 @@
 
             <Grid.ContextMenu>
                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                    <MenuItem Command="{Binding ToggleCommand}"
+                    <MenuItem Command="{Binding StartTimedSynchronizationCommand}"
                               Header="Activate"
                               IsCheckable="True"
                               IsChecked="{Binding IsActive, Mode=OneWay}"
@@ -365,7 +365,7 @@
 
             <Button Grid.Row="10"
                     Grid.ColumnSpan="3"
-                    Command="{Binding ToggleCommand}">
+                    Command="{Binding StartTimedSynchronizationCommand}">
                 <StackPanel Orientation="Horizontal">
                     <mah:FontAwesome Kind="PlaySolid" />
                     <TextBlock Margin="4,0" Text="Start Sync" />
@@ -496,15 +496,16 @@
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={x:Static RelativeSource.Self}}">
-                                    <MenuItem Command="{Binding ToggleCommand}"
-                                              IsCheckable="True"
+                                    <MenuItem IsCheckable="True"
                                               IsChecked="{Binding IsActive, Mode=OneWay}"
                                               ToolTip="{Binding Header, RelativeSource={x:Static RelativeSource.Self}}">
                                         <MenuItem.Style>
                                             <Style TargetType="{x:Type MenuItem}">
                                                 <Setter Property="Header" Value="Start Sync" />
+                                                <Setter Property="Command" Value="{Binding StartTimedSynchronizationCommand}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Command" Value="{Binding StartTimedSynchronizationCommand.CancelCommand}" />
                                                         <Setter Property="Header" Value="Stop Sync" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
