@@ -1,4 +1,5 @@
 ﻿using FS.Sync;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
@@ -37,6 +38,13 @@ namespace FS
         {
             get { return _deleteRightOnlyFiles; }
             set { SetValue(ref _deleteRightOnlyFiles, value); }
+        }
+
+        private bool _respectLastAccessDateTime = true;
+        public bool RespectLastAccessDateTime
+        {
+            get { return _respectLastAccessDateTime; }
+            set { SetValue(ref _respectLastAccessDateTime, value); }
         }
 
         private bool _copyEmptyDirectories = true;
@@ -130,6 +138,13 @@ namespace FS
             private set { SetValue(ref _isActive, value); }
         }
 
+        private bool _showLog;
+        public bool ShowLog
+        {
+            get { return _showLog; }
+            set { SetValue(ref _showLog, value); }
+        }
+
         private TimeSpan _interval = TimeSpan.FromSeconds(30);
         public TimeSpan Interval
         {
@@ -172,7 +187,7 @@ namespace FS
 
             Excludes = new Patterns(commandBuilder, this);
             Includes = new Patterns(commandBuilder, this);
-            Progress = new ProgressViewModel(commandBuilder, progress);
+            Progress = new ProgressViewModel(commandBuilder, progress, this);
             Log = new LogViewModel(commandBuilder);
 
             _syncCommand = commandBuilder
@@ -217,13 +232,10 @@ namespace FS
 
                 using (BusyStack.GetToken())
                 {
-                    Progress.Minimum = 0;
-                    Progress.Maximum = Items.Count;
-                    Progress.Value = 0;
-
                     await Refresh(token).ConfigureAwait(false);
+                    await Progress.Reset().ConfigureAwait(false);
                     await Log.Clear(token).ConfigureAwait(false);
-                    await Items.ForEachAsync(p => Task.Run(() => SyncDirectory(p.FullPath), token), 1).ConfigureAwait(false);
+                    await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
                 }
             }
             finally
@@ -232,9 +244,9 @@ namespace FS
             }
         }
 
-        private void SyncDirectory(string path)
+        private async Task SyncDirectory(string path, CancellationToken token)
         {
-            GuiLabs.FileUtilities.Sync.Directories(path, TargetDirectory, new Arguments()
+            await GuiLabs.FileUtilities.Sync.Directories(path, TargetDirectory, new Arguments()
             {
                 CopyEmptyDirectories = CopyEmptyDirectories,
                 CopyLeftOnlyFiles = CopyLeftOnlyFiles,
@@ -243,11 +255,12 @@ namespace FS
                 DeleteRightOnlyFiles = DeleteRightOnlyFiles,
                 DeleteSameFiles = DeleteSameFiles,
                 UpdateChangedFiles = UpdateChangedFiles,
+                RespectLastAccessDateTime = RespectLastAccessDateTime,
             }, new Log(async (message, color) => await Log.Add(new LogEntry()
             {
                 Message = message,
                 Color = color,
-            }).ConfigureAwait(false)));
+            }).ConfigureAwait(false)), token).ConfigureAwait(false);
 
             _progress.Report(1);
         }

@@ -4,14 +4,15 @@ using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
+using System.ComponentModel;
 
 namespace FS
 {
     public static class CompositionRoot
     {
-        internal static IContainer Compose(App app)
+        internal static DryIoc.IContainer Compose(App app)
         {
-            var c = new Container();
+            var c = new DryIoc.Container();
             c.Register<DirectoriesViewModel>(Reuse.Singleton);
             c.Register<SyncsViewModel>(Reuse.Singleton);
             c.Register<MainViewModel>(Reuse.Singleton);
@@ -25,6 +26,7 @@ namespace FS
             c.UseInstance(typeof(IScarletDispatcher), ScarletDispatcher.Default);
             c.UseInstance(typeof(IExitService), ExitService.Default);
             c.UseInstance(typeof(IScarletMessenger), ScarletMessenger.Default);
+            c.UseInstance(typeof(IWeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>), ScarletWeakEventManager.Default);
 
             return c;
         }

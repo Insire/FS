@@ -113,6 +113,8 @@ namespace FS
                         DeleteRightOnlyFiles = item.DeleteRightOnlyFiles,
                         DeleteRightOnlyDirectories = item.DeleteRightOnlyDirectories,
                         DeleteChangedFiles = item.DeleteChangedFiles,
+                        RespectLastAccessDateTime = item.RespectLastAccessDateTime,
+                        ShowLog = item.ShowLog
                     };
                     await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
@@ -140,6 +142,8 @@ namespace FS
                     DeleteRightOnlyFiles = p.DeleteRightOnlyFiles,
                     DeleteRightOnlyDirectories = p.DeleteRightOnlyDirectories,
                     DeleteChangedFiles = p.DeleteChangedFiles,
+                    RespectLastAccessDateTime = p.RespectLastAccessDateTime,
+                    ShowLog = p.ShowLog,
                     Excludes = p.Excludes.Items.Select(o => new PatternModel()
                     {
                         Value = o.Value,

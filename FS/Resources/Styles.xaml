@@ -67,7 +67,7 @@
                 </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
-                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                    <mvvm:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
                 </i:Interaction.Behaviors>
 
                 <ListBox.ContextMenu>
@@ -139,7 +139,7 @@
                          Minimum="{Binding Progress.Minimum}"
                          Value="{Binding Progress.Value}" />
 
-            <Expander Grid.Row="4">
+            <Expander Grid.Row="4" IsExpanded="{Binding ShowLog}">
                 <Expander.Header>
                     <TextBlock>
                         <Run Text="Log:" />
@@ -287,6 +287,9 @@
                     <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
                     <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
                     <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
+                    <CheckBox Content="RespectLastAccessDateTime"
+                              IsChecked="{Binding RespectLastAccessDateTime}"
+                              ToolTip="Ignore files that are older than the files in the target directory" />
                 </StackPanel>
 
                 <StackPanel Grid.Row="8"
@@ -339,7 +342,7 @@
                 </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
-                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                    <mvvm:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
                 </i:Interaction.Behaviors>
 
                 <ListBox.ContextMenu>
@@ -485,7 +488,7 @@
                 </ListBox.ToolTip>
 
                 <i:Interaction.Behaviors>
-                    <local:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+                    <mvvm:MultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
                 </i:Interaction.Behaviors>
 
                 <ListBox.ItemContainerStyle>

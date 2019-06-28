@@ -38,7 +38,9 @@ namespace FS.Sync
 
         public void PrintFinalReport()
         {
-            var leftColumnWidth = _finalReportEntries.Max(e => e.Item1.Length) + 2;
+            var leftColumnWidth = _finalReportEntries.Count > 0
+                ? _finalReportEntries.Max(e => e.Item1.Length) + 2
+                : 2;
 
             var sb = new StringBuilder();
             foreach (var entry in _finalReportEntries)

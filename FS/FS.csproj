@@ -16,13 +16,10 @@
   <ItemGroup>
     <PackageReference Include="akavache" Version="6.5.9" />
     <PackageReference Include="DryIoc.dll" Version="4.0.5" />
-    <PackageReference Include="Expression.Blend.Sdk" Version="1.0.2" />
+
     <PackageReference Include="Glob" Version="1.1.3" />
     <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="3.0.0-alpha0176" />
-    <PackageReference Include="MvvmScarletToolkit" Version="2.0.17" />
-    <PackageReference Include="MvvmScarletToolkit.Commands" Version="2.0.17" />
-    <PackageReference Include="MvvmScarletToolkit.Implementations" Version="2.0.17" />
-    <PackageReference Include="MvvmScarletToolkit.Observables" Version="2.0.17" />
+    <PackageReference Include="MvvmScarletToolkit" Version="2.0.18" />
   </ItemGroup>
 
   <ItemGroup>

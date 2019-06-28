@@ -15,4 +15,8 @@
     <Compile Include="..\ContentSync\src\ContentSync\Sync.cs" Link="Sync.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Utilities.cs" Link="Utilities.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.18" />
+  </ItemGroup>
 </Project>
