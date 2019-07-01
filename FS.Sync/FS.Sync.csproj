@@ -17,6 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.19" />
+    <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.25" />
   </ItemGroup>
 </Project>
