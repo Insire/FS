@@ -1,21 +1,20 @@
-﻿using MvvmScarletToolkit;
-using MvvmScarletToolkit.Abstractions;
+﻿using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Observables;
 using System;
 using System.Threading.Tasks;
 
 namespace FS
 {
-    public class ProgressViewModel : ViewModelBase, IDisposable
+    public class ProgressViewModel : ViewModelBase
     {
         private readonly Progress<int> _progress;
         private readonly DirectoriesViewModel _directoriesViewModel;
 
-        private int _mininmum;
+        private int _minimum;
         public int Minimum
         {
-            get { return _mininmum; }
-            set { SetValue(ref _mininmum, value); }
+            get { return _minimum; }
+            set { SetValue(ref _minimum, value); }
         }
 
         private int _maximum;
@@ -45,9 +44,14 @@ namespace FS
             await Dispatcher.Invoke(() => Value += e).ConfigureAwait(false);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _progress.ProgressChanged -= ProgressChanged;
+            if (disposing)
+            {
+                _progress.ProgressChanged -= ProgressChanged;
+            }
+
+            base.Dispose(disposing);
         }
 
         public async Task Reset()

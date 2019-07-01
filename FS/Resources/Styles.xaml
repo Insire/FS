@@ -5,7 +5,6 @@
                     xmlns:mah="http://metro.mahapps.com/winfx/xaml/iconpacks"
                     xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
 
-    <local:ConsoleColorConverter x:Key="ConsoleColorConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <DataTemplate DataType="{x:Type local:DirectoryViewModel}">
@@ -19,7 +18,7 @@
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:LogEntry}">
-        <TextBlock Foreground="{Binding Color, Converter={StaticResource ConsoleColorConverter}}" Text="{Binding Message}" />
+        <TextBlock Foreground="{Binding Color, Converter={local:ConsoleColorConverter}}" Text="{Binding Message}" />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type local:Patterns}">
@@ -135,9 +134,9 @@
                              DueTime="{Binding NextExecution}" />
 
             <ProgressBar Grid.Row="2"
-                         Maximum="{Binding Progress.Maximum}"
-                         Minimum="{Binding Progress.Minimum}"
-                         Value="{Binding Progress.Value}" />
+                         Maximum="{Binding ProgressViewModel.Maximum}"
+                         Minimum="{Binding ProgressViewModel.Minimum}"
+                         Value="{Binding ProgressViewModel.Value}" />
 
             <Expander Grid.Row="4" IsExpanded="{Binding ShowLog}">
                 <Expander.Header>

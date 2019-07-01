@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MvvmScarletToolkit;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Data;
@@ -6,7 +7,8 @@ using System.Windows.Media;
 
 namespace FS
 {
-    public sealed class ConsoleColorConverter : IValueConverter
+    [ValueConversion(typeof(ConsoleColor), typeof(Brush))]
+    public sealed class ConsoleColorConverter : ConverterMarkupExtension<ConsoleColorConverter>
     {
         private readonly static Dictionary<ConsoleColor, Brush> _lookup = new Dictionary<ConsoleColor, Brush>
         {
@@ -30,7 +32,7 @@ namespace FS
             [ConsoleColor.DarkYellow] = new SolidColorBrush(Color.FromArgb(255, 218, 165, 32)),
         };
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public override object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is ConsoleColor color)
             {
@@ -38,11 +40,6 @@ namespace FS
             }
 
             return _lookup[ConsoleColor.Gray];
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return Binding.DoNothing;
         }
     }
 }

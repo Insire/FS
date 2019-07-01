@@ -10,7 +10,7 @@ namespace FS
 {
     public static class CompositionRoot
     {
-        internal static DryIoc.IContainer Compose(App app)
+        internal static DryIoc.IContainer Compose()
         {
             var c = new DryIoc.Container();
             c.Register<DirectoriesViewModel>(Reuse.Singleton);

@@ -10,8 +10,9 @@ namespace FS
             set { SetValue(TextProperty, value); }
         }
 
+        /// <summary>Identifies the <see cref="Text"/> dependency property.</summary>
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
-            "Text",
+            nameof(Text),
             typeof(string),
             typeof(BusyAnimation),
             new PropertyMetadata(default(string)));

@@ -6,24 +6,26 @@ namespace FS
 {
     public partial class CountDown
     {
+        /// <summary>Identifies the <see cref="RemainingTime"/> dependency property.</summary>
         public static readonly DependencyProperty RemainingTimeProperty = DependencyProperty.Register(
             nameof(RemainingTime),
             typeof(TimeSpan),
             typeof(CountDown),
             new PropertyMetadata(TimeSpan.Zero));
 
+        /// <summary>Identifies the <see cref="DueTime"/> dependency property.</summary>
         public static readonly DependencyProperty DueTimeProperty = DependencyProperty.Register(
             nameof(DueTime),
             typeof(DateTime),
             typeof(CountDown),
-            new PropertyMetadata(DateTime.Now, DueTimeChanged));
+            new PropertyMetadata(DateTime.Now, OnDueTimeChanged));
 
-        private static void DueTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDueTimeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (!(d is CountDown countDown))
                 return;
 
-            countDown.SetupTimer();
+            countDown.OnDueTimeChanged();
         }
 
         private readonly DispatcherTimer _timer;
@@ -50,7 +52,7 @@ namespace FS
             };
         }
 
-        private void SetupTimer()
+        private void OnDueTimeChanged()
         {
             _timer.Tick -= TimerTick;
             _timer.Tick += TimerTick;
@@ -64,12 +66,12 @@ namespace FS
 
             if (remainingTime > 0)
             {
-                RemainingTime = DueTime - now;
+                SetCurrentValue(RemainingTimeProperty, DueTime - now);
             }
             else
             {
                 _timer.Stop();
-                RemainingTime = TimeSpan.Zero;
+                SetCurrentValue(RemainingTimeProperty, TimeSpan.Zero);
             }
         }
     }

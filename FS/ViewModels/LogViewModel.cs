@@ -1,8 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using MvvmScarletToolkit;
-using MvvmScarletToolkit.Abstractions;
+﻿using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Observables;
+using System;
+using System.Threading.Tasks;
 
 namespace FS
 {
@@ -28,7 +27,7 @@ namespace FS
                 }).ConfigureAwait(continueOnCapturedContext: false);
                 await Dispatcher.Invoke(delegate
                 {
-                    OnPropertyChanged("Count");
+                    OnPropertyChanged(nameof(Count));
                 }).ConfigureAwait(continueOnCapturedContext: false);
             }
         }

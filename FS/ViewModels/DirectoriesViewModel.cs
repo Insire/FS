@@ -98,17 +98,17 @@ namespace FS
         }
 
         private ProgressViewModel _progressViewModel;
-        public ProgressViewModel Progress
+        public ProgressViewModel ProgressViewModel
         {
             get { return _progressViewModel; }
             private set { SetValue(ref _progressViewModel, value); }
         }
 
-        private string _sourceDirctory;
+        private string _targetDirectory;
         public string TargetDirectory
         {
-            get { return _sourceDirctory; }
-            set { SetValue(ref _sourceDirctory, value); }
+            get { return _targetDirectory; }
+            set { SetValue(ref _targetDirectory, value); }
         }
 
         private string _root;
@@ -187,7 +187,7 @@ namespace FS
             Log = new LogViewModel(commandBuilder);
             Excludes = new Patterns(commandBuilder, this);
             Includes = new Patterns(commandBuilder, this);
-            Progress = new ProgressViewModel(commandBuilder, progress, this);
+            ProgressViewModel = new ProgressViewModel(commandBuilder, progress, this);
 
             _syncCommand = commandBuilder
                 .Create(Synchronize, CanSync)
@@ -234,7 +234,7 @@ namespace FS
 
                 using (BusyStack.GetToken())
                 {
-                    await Progress.Reset().ConfigureAwait(false);
+                    await ProgressViewModel.Reset().ConfigureAwait(false);
                     await Log.Clear(token).ConfigureAwait(false);
                     await Refresh(token).ConfigureAwait(false);
                     await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
