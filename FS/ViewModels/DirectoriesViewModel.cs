@@ -17,9 +17,6 @@ namespace FS
         private readonly IProgress<int> _progress;
         private readonly ConcurrentCommandBase _syncCommand;
 
-        private bool _syncInProgress;
-        private Timer _timer;
-
         private bool _copyLeftOnlyFiles = true;
         public bool CopyLeftOnlyFiles
         {
@@ -228,21 +225,12 @@ namespace FS
 
         private async Task Synchronize(CancellationToken token)
         {
-            try
+            using (BusyStack.GetToken())
             {
-                _syncInProgress = true;
-
-                using (BusyStack.GetToken())
-                {
-                    await ProgressViewModel.Reset().ConfigureAwait(false);
-                    await Log.Clear(token).ConfigureAwait(false);
-                    await Refresh(token).ConfigureAwait(false);
-                    await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _syncInProgress = false;
+                await ProgressViewModel.Reset().ConfigureAwait(false);
+                await Log.Clear(token).ConfigureAwait(false);
+                await Refresh(token).ConfigureAwait(false);
+                await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
             }
         }
 
@@ -310,45 +298,28 @@ namespace FS
                     Interval = TimeSpan.FromHours(double.Parse(IntervalInput));
                     break;
             }
-
-            if (_timer is null)
-                return;
-
-            _timer.Change(TimeSpan.Zero, Interval);
         }
 
         private async Task StartTimedSynchronization(CancellationToken token)
         {
-            token.Register(async () =>
-            {
-                _timer.Dispose();
-                _timer = null;
-                await Dispatcher.Invoke(() => IsActive = false).ConfigureAwait(false);
-            });
-
             using (BusyStack.GetToken())
             {
                 try
                 {
-                    _timer = new Timer(Callback, null, TimeSpan.Zero, Interval);
+                    await Dispatcher.Invoke(() => IsActive = true, token).ConfigureAwait(false);
+                    do
+                    {
+                        await Synchronize(token).ConfigureAwait(false);
+                        await UpdateExecution().ConfigureAwait(false);
+                        await Task.Delay(Interval).ConfigureAwait(false);
+                    } while (!token.IsCancellationRequested);
                 }
                 finally
                 {
+                    await Dispatcher.Invoke(() => IsActive = false).ConfigureAwait(false);
                     await UpdateExecution().ConfigureAwait(false);
-                    await Dispatcher.Invoke(() => IsActive = true, token).ConfigureAwait(false);
                 }
             }
-
-#pragma warning disable RCS1163 // Unused parameter.
-            async void Callback(object state)
-            {
-                if (_syncInProgress)
-                    return;
-
-                await Synchronize(token).ConfigureAwait(false);
-                await UpdateExecution().ConfigureAwait(false);
-            }
-#pragma warning restore RCS1163 // Unused parameter.
 
             async Task UpdateExecution()
             {
@@ -360,7 +331,7 @@ namespace FS
 
         private bool CanStartTimedSynchronization()
         {
-            return _timer is null && CanSync();
+            return CanSync();
         }
 
         private async Task Exclude(CancellationToken token)
