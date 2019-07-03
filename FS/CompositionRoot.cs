@@ -1,5 +1,4 @@
-﻿using Akavache;
-using DryIoc;
+﻿using DryIoc;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
@@ -13,6 +12,7 @@ namespace FS
         internal static DryIoc.IContainer Compose()
         {
             var c = new DryIoc.Container();
+
             c.Register<DirectoriesViewModel>(Reuse.Singleton);
             c.Register<SyncsViewModel>(Reuse.Singleton);
             c.Register<MainViewModel>(Reuse.Singleton);
@@ -20,8 +20,6 @@ namespace FS
 
             c.Register<IBusyStack, BusyStack>(Reuse.Transient);
 
-            Registrations.Start("FS");
-            c.UseInstance(typeof(IBlobCache), BlobCache.UserAccount);
             c.UseInstance(typeof(IScarletCommandManager), ScarletCommandManager.Default);
             c.UseInstance(typeof(IScarletDispatcher), ScarletDispatcher.Default);
             c.UseInstance(typeof(IExitService), ExitService.Default);

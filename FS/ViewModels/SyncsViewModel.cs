@@ -1,4 +1,4 @@
-﻿using Akavache;
+﻿using LiteDB;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
@@ -13,8 +13,8 @@ namespace FS
 {
     public sealed class SyncsViewModel : BusinessViewModelListBase<DirectoriesViewModel>
     {
+        private readonly string _connectionString = "FS.SyncsViewModel";
         private const string _key = "FS.SyncsViewModel";
-        private readonly IBlobCache _cache;
 
         private string _root;
         public string Root
@@ -25,10 +25,10 @@ namespace FS
 
         public ICommand AddCommand { get; }
 
-        public SyncsViewModel(ICommandBuilder commandBuilder, IBlobCache cache)
+        public SyncsViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _connectionString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FS", "FS.db");
 
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
@@ -36,11 +36,11 @@ namespace FS
                 .Build();
         }
 
-        protected override Task RefreshInternal(CancellationToken token)
+        protected override async Task RefreshInternal(CancellationToken token)
         {
             if (!IsLoaded)
             {
-                Load();
+                await Load().ConfigureAwait(false);
 
                 if (Root is null)
                 {
@@ -54,9 +54,6 @@ namespace FS
                     Root = new DirectoryInfo(".").FullName;
                 }
             }
-
-            // + load data from storage
-            return Task.CompletedTask;
         }
 
         private async Task Add(CancellationToken token)
@@ -88,13 +85,33 @@ namespace FS
 
         private void Save()
         {
-            _cache.InsertObject(_key, GetModel());
+            using (var db = new LiteDatabase(_connectionString))
+            {
+                var models = db.GetCollection<SyncsModel>();
+                var id = new BsonValue(_key);
+                var model = models.FindById(id);
+                if (model is null)
+                {
+                    models.Insert(id, GetModel());
+                }
+                else
+                {
+                    models.Update(id, GetModel());
+                }
+            }
         }
 
-        private void Load()
+        private async Task Load()
         {
-            _cache.GetObject<SyncsModel>(_key).Subscribe(async model =>
+            using (var db = new LiteDatabase(_connectionString))
             {
+                var models = db.GetCollection<SyncsModel>();
+
+                var model = models.FindById(new BsonValue(_key));
+
+                if (model is null)
+                    return;
+
                 Root = model.Root;
 
                 foreach (var item in model.Items)
@@ -120,7 +137,7 @@ namespace FS
                     await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await Add(dModel).ConfigureAwait(false);
                 }
-            });
+            }
         }
 
         private SyncsModel GetModel()
