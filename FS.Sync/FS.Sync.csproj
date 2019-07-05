@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="..\ContentSync\src\ContentSync\DiffResults.cs" Link="DiffResults.cs" />
-    <Compile Include="..\ContentSync\src\ContentSync\DirectoryContentsCache.cs" Link="DirectoryContentsCache.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Files.cs" Link="Files.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\FileSystem.cs" Link="FileSystem.cs" />
     <Compile Include="..\ContentSync\src\ContentSync\Folders.cs" Link="Folders.cs" />
@@ -18,5 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.27" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.2" />
   </ItemGroup>
 </Project>

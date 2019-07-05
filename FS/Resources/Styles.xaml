@@ -181,10 +181,6 @@
                               IsCheckable="True"
                               IsChecked="{Binding IsActive, Mode=OneWay}"
                               ToolTip="Activate" />
-                    <MenuItem Command="{Binding SyncCommand}"
-                              Header="Sync"
-                              Icon="{mah:FontAwesome Kind=PlaySolid}"
-                              ToolTip="Sync" />
                 </ContextMenu>
             </Grid.ContextMenu>
 
@@ -284,7 +280,6 @@
                             Grid.Column="2"
                             Orientation="Vertical">
                     <CheckBox Content="CopyLeftOnlyFiles" IsChecked="{Binding CopyLeftOnlyFiles}" />
-                    <CheckBox Content="CopyEmptyDirectories" IsChecked="{Binding CopyEmptyDirectories}" />
                     <CheckBox Content="UpdateChangedFiles" IsChecked="{Binding UpdateChangedFiles}" />
                     <CheckBox Content="RespectLastAccessDateTime"
                               IsChecked="{Binding RespectLastAccessDateTime}"
@@ -295,7 +290,6 @@
                             Grid.Column="6"
                             Orientation="Vertical">
                     <CheckBox Content="DeleteRightOnlyFiles" IsChecked="{Binding DeleteRightOnlyFiles}" />
-                    <CheckBox Content="DeleteRightOnlyDirectories" IsChecked="{Binding DeleteRightOnlyDirectories}" />
                     <CheckBox Content="DeleteSameFiles" IsChecked="{Binding DeleteSameFiles}" />
                     <CheckBox Content="DeleteChangedFiles" IsChecked="{Binding DeleteChangedFiles}" />
                 </StackPanel>
@@ -367,7 +361,7 @@
                     Command="{Binding StartTimedSynchronizationCommand}">
                 <StackPanel Orientation="Horizontal">
                     <mah:FontAwesome Kind="PlaySolid" />
-                    <TextBlock Margin="4,0" Text="Start Sync" />
+                    <TextBlock Margin="4,0" Text="Sync" />
                 </StackPanel>
             </Button>
         </Grid>
@@ -436,7 +430,9 @@
     <DataTemplate x:Key="DefaultSyncViewModelTemplate" DataType="{x:Type local:SyncsViewModel}">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.25*" />
+                <ColumnDefinition Width="Auto"
+                                  MinWidth="100"
+                                  MaxWidth="300" />
                 <ColumnDefinition Width="4" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="4" />
@@ -459,7 +455,7 @@
                      SelectionMode="Extended">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type local:DirectoriesViewModel}">
-                        <DockPanel LastChildFill="True">
+                        <DockPanel>
                             <TextBlock VerticalAlignment="Center"
                                        DockPanel.Dock="Right"
                                        Text="{Binding Count}" />
@@ -500,7 +496,7 @@
                                               ToolTip="{Binding Header, RelativeSource={x:Static RelativeSource.Self}}">
                                         <MenuItem.Style>
                                             <Style TargetType="{x:Type MenuItem}">
-                                                <Setter Property="Header" Value="Start Sync" />
+                                                <Setter Property="Header" Value="Sync" />
                                                 <Setter Property="Command" Value="{Binding StartTimedSynchronizationCommand}" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsActive}" Value="True">

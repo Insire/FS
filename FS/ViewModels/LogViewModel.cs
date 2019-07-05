@@ -1,6 +1,7 @@
 ﻿using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Observables;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FS
@@ -12,7 +13,7 @@ namespace FS
         {
         }
 
-        public override async Task Add(LogEntry item)
+        public async Task Add(LogEntry item, CancellationToken token)
         {
             if (item is null)
             {
@@ -24,11 +25,11 @@ namespace FS
                 await Dispatcher.Invoke(delegate
                 {
                     _items.Insert(0, item);
-                }).ConfigureAwait(continueOnCapturedContext: false);
+                }, token).ConfigureAwait(continueOnCapturedContext: false);
                 await Dispatcher.Invoke(delegate
                 {
                     OnPropertyChanged(nameof(Count));
-                }).ConfigureAwait(continueOnCapturedContext: false);
+                }, token).ConfigureAwait(continueOnCapturedContext: false);
             }
         }
     }

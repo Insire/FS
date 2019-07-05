@@ -4,6 +4,7 @@ using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -43,20 +44,6 @@ namespace FS
         {
             get { return _respectLastAccessDateTime; }
             set { SetValue(ref _respectLastAccessDateTime, value); }
-        }
-
-        private bool _copyEmptyDirectories = true;
-        public bool CopyEmptyDirectories
-        {
-            get { return _copyEmptyDirectories; }
-            set { SetValue(ref _copyEmptyDirectories, value); }
-        }
-
-        private bool _deleteRightOnlyDirectories = true;
-        public bool DeleteRightOnlyDirectories
-        {
-            get { return _deleteRightOnlyDirectories; }
-            set { SetValue(ref _deleteRightOnlyDirectories, value); }
         }
 
         private bool _deleteSameFiles;
@@ -221,32 +208,45 @@ namespace FS
 
         private async Task Synchronize(CancellationToken token)
         {
-            using (BusyStack.GetToken())
+            try
             {
-                await ProgressViewModel.Reset().ConfigureAwait(false);
-                await Log.Clear(token).ConfigureAwait(false);
-                await Refresh(token).ConfigureAwait(false);
-                await Items.ForEachAsync(p => SyncDirectory(p.FullPath, token)).ConfigureAwait(false);
+                using (BusyStack.GetToken())
+                {
+                    await ProgressViewModel.Reset().ConfigureAwait(false);
+                    await Log.Clear(token).ConfigureAwait(false);
+
+                    Debug.WriteLine("Refreshing...");
+                    await Refresh(token).ConfigureAwait(false);
+
+                    Debug.WriteLine("Synchronizing...");
+                    await Task.Run(() => Items.ForEach(p => SyncDirectory(p.FullPath, token)), token).ConfigureAwait(false);
+                }
+            }
+            catch (TaskCanceledException)
+            {
             }
         }
 
-        private async Task SyncDirectory(string path, CancellationToken token)
+        private void SyncDirectory(string path, CancellationToken token)
         {
-            await GuiLabs.FileUtilities.Sync.Directories(path, TargetDirectory, new Arguments()
+            if (token.IsCancellationRequested)
+                return;
+
+            var log = new Log(async (message, color) => await Log.Add(new LogEntry()
             {
-                CopyEmptyDirectories = CopyEmptyDirectories,
+                Message = message,
+                Color = color,
+            }, token).ConfigureAwait(false));
+
+            GuiLabs.FileUtilities.Sync.Directories(path, TargetDirectory, log, token, new Arguments()
+            {
                 CopyLeftOnlyFiles = CopyLeftOnlyFiles,
                 DeleteChangedFiles = DeleteChangedFiles,
-                DeleteRightOnlyDirectories = DeleteRightOnlyDirectories,
                 DeleteRightOnlyFiles = DeleteRightOnlyFiles,
                 DeleteSameFiles = DeleteSameFiles,
                 UpdateChangedFiles = UpdateChangedFiles,
                 RespectLastAccessDateTime = RespectLastAccessDateTime,
-            }, new Log(async (message, color) => await Log.Add(new LogEntry()
-            {
-                Message = message,
-                Color = color,
-            }).ConfigureAwait(false)), token).ConfigureAwait(false);
+            });
 
             _progress.Report(1);
         }
