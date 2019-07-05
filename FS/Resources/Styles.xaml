@@ -169,7 +169,7 @@
     <DataTemplate x:Key="DirectoriesConfigTemplate" DataType="{x:Type local:DirectoriesViewModel}">
         <Grid>
             <i:Interaction.Triggers>
-                <i:EventTrigger EventName="Loaded">
+                <i:EventTrigger EventName="LayoutUpdated">
                     <i:InvokeCommandAction Command="{Binding LoadCommand}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
@@ -516,7 +516,7 @@
                                               Icon="{mah:FontAwesome Kind=CloneSolid}"
                                               ToolTip="Clone" />
 
-                                    <MenuItem Command="{Binding Data.RemoveCommand, Source={StaticResource DataContextProxy}}"
+                                    <MenuItem Command="{Binding Data.RemoveRangeCommand, Source={StaticResource DataContextProxy}}"
                                               Header="Remove"
                                               Icon="{mah:FontAwesome Kind=MinusSolid}"
                                               ToolTip="Remove" />
