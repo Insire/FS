@@ -1,6 +1,3 @@
-#tool "nuget:?package=Squirrel.Windows&version=1.9.1"
-
-#addin "Cake.Squirrel&version=0.14.0"
 #addin "Cake.Incubator&version=5.0.1"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,18 +26,6 @@ Task("CleanSolution")
 
             foreach(var path in customProject.OutputPaths)
                 CleanDirectory(path.FullPath);
-        }
-
-        var folders = new[]
-        {
-            new DirectoryPath(".\\packages\\"),
-            new DirectoryPath(".\\releases\\"),
-        };
-
-        foreach(var folder in folders)
-        {
-            EnsureDirectoryExists(folder);
-            CleanDirectory(folder,(file) => !file.Path.Segments.Last().Contains(".gitignore"));
         }
 });
 
@@ -152,68 +137,6 @@ Task("Build")
       }
    });
 
-Task("Pack")
-    .Does(()=>
-    {
-         var assemblyInfoParseResult = ParseAssemblyInfo("SharedAssemblyInfo.cs");  
-         var settings = new NuGetPackSettings()
-         {
-            Id                   = "InFact.FileSync",
-            Title                = "InFact.FileSync",
-            Version              = $"{assemblyInfoParseResult.AssemblyVersion}",
-            Authors              = new[] {"Peter Vietense"},
-            Owners               = new[] {"Peter Vietense"},
-            Description          = "InFact.FileSync is a utility tool for synchronizing directories.",
-
-            Symbols              = false,
-            NoPackageAnalysis    = false,
-            Files                = new[]
-            {
-               new NuSpecContent{ Source=".\\FS\\bin\\Release\\*",Target="lib\\net45\\", Exclude="*.pdb;*.nupkg;*.vshost.*"},
-               new NuSpecContent{ Source=".\\FS\\bin\\Release\\net472\\*",Target="lib\\net45\\net472\\", Exclude="*.pdb;*.nupkg;*.vshost.*"},
-            },
-            BasePath                    = new DirectoryPath("."),
-            OutputDirectory             = new DirectoryPath(".\\packages\\"),
-            KeepTemporaryNuSpecFile     = false,
-         };
-
-         NuGetPack(settings);
-});
-
-Task("CreateInstaller")
-   .Does(()=>
-   {
-      var settings = new SquirrelSettings()
-      {
-         NoMsi = true,
-         NoDelta = false,
-         Silent = true,
-         FrameworkVersion = "472",
-         ReleaseDirectory = new DirectoryPath(".\\releases\\"),
-         Icon = new FilePath(".\\icon.ico"),
-         SetupIcon =  new FilePath(".\\icon.ico"),
-         ShortCutLocations = "Desktop,StartMenu",
-      };
-
-      var nupkg = GetFiles(".\\packages\\*.nupkg").First();
-
-      Squirrel(nupkg, settings);
-   });
-
-Task("PushLocally")
-    .WithCriteria(() => BuildSystem.IsLocalBuild && DirectoryExists(@"D:\Drop\NuGet"))
-    .DoesForEach(() => GetFiles(".\\packages" + "\\*.nupkg"), path =>
-    {
-        var settings = new ProcessSettings()
-            .UseWorkingDirectory(".")
-            .WithArguments(builder => builder
-            .Append("push")
-            .AppendSwitchQuoted("-source", @"D:\Drop\NuGet")
-            .AppendQuoted(path.FullPath));
-
-        StartProcess(".\\tools\\nuget.exe",settings);
-    });
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // TASKS
@@ -222,9 +145,6 @@ Task("PushLocally")
 Task("Default")
    .IsDependentOn("CleanSolution")
    .IsDependentOn("UpdateAssemblyInfo")
-   .IsDependentOn("Build")
-   .IsDependentOn("Pack")
-   .IsDependentOn("CreateInstaller")
-   .IsDependentOn("PushLocally");
+   .IsDependentOn("Build");
 
 RunTarget(target);
