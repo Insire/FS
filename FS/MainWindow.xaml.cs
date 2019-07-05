@@ -1,7 +1,4 @@
-﻿using Splat;
-using Squirrel;
-using System;
-using System.Windows;
+﻿using System.Windows;
 
 namespace FS
 {
@@ -10,16 +7,6 @@ namespace FS
         public MainWindow()
         {
             InitializeComponent();
-        }
-
-        protected override async void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-
-            using (var manager = new UpdateManager("D:\\Drop\\Nuget\\", "InFact.FileSync"))
-            {
-                await manager.UpdateApp().ConfigureAwait(false);
-            }
         }
     }
 }
