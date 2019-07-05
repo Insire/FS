@@ -1,6 +1,12 @@
 ﻿using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Observables;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Concurrency;
+using System.Reactive.PlatformServices;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace FS
@@ -9,6 +15,8 @@ namespace FS
     {
         private readonly Progress<int> _progress;
         private readonly DirectoriesViewModel _directoriesViewModel;
+        private readonly IObservable<int> _observable;
+        private readonly IDisposable _disposable;
 
         private int _minimum;
         public int Minimum
@@ -36,19 +44,32 @@ namespace FS
         {
             _directoriesViewModel = directoriesViewModel ?? throw new ArgumentNullException(nameof(directoriesViewModel));
             _progress = progress ?? throw new ArgumentNullException(nameof(progress));
-            _progress.ProgressChanged += ProgressChanged;
+
+            _observable = Observable.FromEvent<EventHandler<int>, int>(handler => (_, e) => handler(e)
+            , fsHandler => _progress.ProgressChanged += fsHandler
+            , fsHandler => _progress.ProgressChanged -= fsHandler);
+
+            _disposable = _observable
+                .Publish(ps => ps.Buffer(() => ps.Throttle(TimeSpan.FromSeconds(1))))
+                .Subscribe(x => ProgressChanged(x.Sum()));
+
+            //_disposable = _observable
+            //    .Window(TimeSpan.FromSeconds(1))
+            //    .Count()
+            //    .Subscribe(ProgressChanged);
         }
 
-        private async void ProgressChanged(object sender, int e)
+        private async void ProgressChanged(int e)
         {
             await Dispatcher.Invoke(() => Value += e).ConfigureAwait(false);
+            Debug.WriteLine("ProgressChanged " + Value);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _progress.ProgressChanged -= ProgressChanged;
+                _disposable.Dispose();
             }
 
             base.Dispose(disposing);
