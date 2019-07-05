@@ -208,19 +208,15 @@ namespace FS
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
-            var items = await Task.Run(() =>
-            {
-                var includes = Includes.GetDirectories();
-                var excludes = Excludes.GetDirectories();
+            var includes = Task.Run(() => Includes.GetDirectories().ToArray());
+            var excludes = Task.Run(() => Excludes.GetDirectories().ToArray());
 
-                return includes.Except(excludes)
+            await Task.WhenAll(includes, excludes).ConfigureAwait(false);
+
+            await AddRange(includes.Result.Except(excludes.Result)
                     .Distinct()
                     .OrderBy(p => p)
-                    .Select(p => new DirectoryViewModel(p))
-                    .ToArray();
-            }).ConfigureAwait(false);
-
-            await AddRange(items).ConfigureAwait(false);
+                    .Select(p => new DirectoryViewModel(p))).ConfigureAwait(false);
         }
 
         private async Task Synchronize(CancellationToken token)

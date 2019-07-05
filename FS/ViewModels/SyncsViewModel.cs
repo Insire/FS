@@ -13,8 +13,8 @@ namespace FS
 {
     public sealed class SyncsViewModel : BusinessViewModelListBase<DirectoriesViewModel>
     {
-        private readonly string _connectionString = "FS.SyncsViewModel";
         private const string _key = "FS.SyncsViewModel";
+        private readonly string _connectionString;
 
         private string _root;
         public string Root
@@ -25,6 +25,8 @@ namespace FS
 
         public ICommand AddCommand { get; }
 
+        public ICommand CloneCommand { get; }
+
         public SyncsViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
@@ -33,6 +35,14 @@ namespace FS
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
                 .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
+                .Build();
+
+            CloneCommand = commandBuilder
+                .Create(Clone, CanClone)
+                .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
+                .WithCancellation()
                 .Build();
         }
 
@@ -54,6 +64,37 @@ namespace FS
                     Root = new DirectoryInfo(".").FullName;
                 }
             }
+        }
+
+        private async Task Clone(CancellationToken token)
+        {
+            var dModel = new DirectoriesViewModel(CommandBuilder)
+            {
+                Id = Count + 1,
+                Name = SelectedItem.Name + " Clone " + (Count + 1),
+                Root = SelectedItem.Root,
+                Interval = SelectedItem.Interval,
+                TargetDirectory = SelectedItem.TargetDirectory,
+                CopyEmptyDirectories = SelectedItem.CopyEmptyDirectories,
+                CopyLeftOnlyFiles = SelectedItem.CopyLeftOnlyFiles,
+                UpdateChangedFiles = SelectedItem.UpdateChangedFiles,
+                DeleteSameFiles = SelectedItem.DeleteSameFiles,
+                DeleteRightOnlyFiles = SelectedItem.DeleteRightOnlyFiles,
+                DeleteRightOnlyDirectories = SelectedItem.DeleteRightOnlyDirectories,
+                DeleteChangedFiles = SelectedItem.DeleteChangedFiles,
+                RespectLastAccessDateTime = SelectedItem.RespectLastAccessDateTime,
+                ShowLog = SelectedItem.ShowLog,
+            };
+
+            await dModel.Includes.AddRange(SelectedItem.Includes.Items).ConfigureAwait(false);
+            await dModel.Excludes.AddRange(SelectedItem.Excludes.Items).ConfigureAwait(false);
+
+            await Add(dModel).ConfigureAwait(false);
+        }
+
+        private bool CanClone()
+        {
+            return !IsBusy && SelectedItem != null;
         }
 
         private async Task Add(CancellationToken token)
@@ -133,6 +174,7 @@ namespace FS
                         RespectLastAccessDateTime = item.RespectLastAccessDateTime,
                         ShowLog = item.ShowLog
                     };
+
                     await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await Add(dModel).ConfigureAwait(false);

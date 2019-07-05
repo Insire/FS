@@ -511,6 +511,11 @@
                                             </Style>
                                         </MenuItem.Style>
                                     </MenuItem>
+                                    <MenuItem Command="{Binding Data.CloneCommand, Source={StaticResource DataContextProxy}}"
+                                              Header="Clone"
+                                              Icon="{mah:FontAwesome Kind=CloneSolid}"
+                                              ToolTip="Clone" />
+
                                     <MenuItem Command="{Binding Data.RemoveCommand, Source={StaticResource DataContextProxy}}"
                                               Header="Remove"
                                               Icon="{mah:FontAwesome Kind=MinusSolid}"
