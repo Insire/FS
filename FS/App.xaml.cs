@@ -1,5 +1,4 @@
-﻿using Akavache;
-using DryIoc;
+﻿using DryIoc;
 using MvvmScarletToolkit;
 using System.Windows;
 
@@ -32,7 +31,6 @@ namespace FS
         {
             base.OnExit(e);
             await ExitService.Default.ShutDown().ConfigureAwait(false);
-            BlobCache.Shutdown().Wait();
 
             _container?.Dispose();
         }

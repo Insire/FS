@@ -1,4 +1,4 @@
-﻿using Akavache;
+﻿using LiteDB;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
@@ -13,8 +13,8 @@ namespace FS
 {
     public sealed class SyncsViewModel : BusinessViewModelListBase<DirectoriesViewModel>
     {
-        private const string _key = "FS.SyncsViewModel";
-        private readonly IBlobCache _cache;
+        private const string Key = "FS.SyncsViewModel";
+        private readonly string _connectionString;
 
         private string _root;
         public string Root
@@ -25,22 +25,32 @@ namespace FS
 
         public ICommand AddCommand { get; }
 
-        public SyncsViewModel(ICommandBuilder commandBuilder, IBlobCache cache)
+        public ICommand CloneCommand { get; }
+
+        public SyncsViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
-            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _connectionString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FS", "FS.db");
 
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
                 .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
+                .Build();
+
+            CloneCommand = commandBuilder
+                .Create(Clone, CanClone)
+                .WithSingleExecution(CommandManager)
+                .WithBusyNotification(BusyStack)
+                .WithCancellation()
                 .Build();
         }
 
-        protected override Task RefreshInternal(CancellationToken token)
+        protected override async Task RefreshInternal(CancellationToken token)
         {
             if (!IsLoaded)
             {
-                Load();
+                await Load().ConfigureAwait(false);
 
                 if (Root is null)
                 {
@@ -54,9 +64,35 @@ namespace FS
                     Root = new DirectoryInfo(".").FullName;
                 }
             }
+        }
 
-            // + load data from storage
-            return Task.CompletedTask;
+        private async Task Clone(CancellationToken token)
+        {
+            var dModel = new DirectoriesViewModel(CommandBuilder)
+            {
+                Id = Count + 1,
+                Name = SelectedItem.Name + " Clone " + (Count + 1),
+                Root = SelectedItem.Root,
+                Interval = SelectedItem.Interval,
+                TargetDirectory = SelectedItem.TargetDirectory,
+                CopyLeftOnlyFiles = SelectedItem.CopyLeftOnlyFiles,
+                UpdateChangedFiles = SelectedItem.UpdateChangedFiles,
+                DeleteSameFiles = SelectedItem.DeleteSameFiles,
+                DeleteRightOnlyFiles = SelectedItem.DeleteRightOnlyFiles,
+                DeleteChangedFiles = SelectedItem.DeleteChangedFiles,
+                RespectLastAccessDateTime = SelectedItem.RespectLastAccessDateTime,
+                ShowLog = SelectedItem.ShowLog,
+            };
+
+            await dModel.Includes.AddRange(SelectedItem.Includes.Items).ConfigureAwait(false);
+            await dModel.Excludes.AddRange(SelectedItem.Excludes.Items).ConfigureAwait(false);
+
+            await Add(dModel).ConfigureAwait(false);
+        }
+
+        private bool CanClone()
+        {
+            return !IsBusy && SelectedItem != null;
         }
 
         private async Task Add(CancellationToken token)
@@ -88,13 +124,33 @@ namespace FS
 
         private void Save()
         {
-            _cache.InsertObject(_key, GetModel());
+            using (var db = new LiteDatabase(_connectionString))
+            {
+                var models = db.GetCollection<SyncsModel>();
+                var id = new BsonValue(Key);
+                var model = models.FindById(id);
+                if (model is null)
+                {
+                    models.Insert(id, GetModel());
+                }
+                else
+                {
+                    models.Update(id, GetModel());
+                }
+            }
         }
 
-        private void Load()
+        private async Task Load()
         {
-            _cache.GetObject<SyncsModel>(_key).Subscribe(async model =>
+            using (var db = new LiteDatabase(_connectionString))
             {
+                var models = db.GetCollection<SyncsModel>();
+
+                var model = models.FindById(new BsonValue(Key));
+
+                if (model is null)
+                    return;
+
                 Root = model.Root;
 
                 foreach (var item in model.Items)
@@ -106,21 +162,20 @@ namespace FS
                         Root = item.Root,
                         Interval = item.Interval,
                         TargetDirectory = item.TargetDirectory,
-                        CopyEmptyDirectories = item.CopyEmptyDirectories,
                         CopyLeftOnlyFiles = item.CopyLeftOnlyFiles,
                         UpdateChangedFiles = item.UpdateChangedFiles,
                         DeleteSameFiles = item.DeleteSameFiles,
                         DeleteRightOnlyFiles = item.DeleteRightOnlyFiles,
-                        DeleteRightOnlyDirectories = item.DeleteRightOnlyDirectories,
                         DeleteChangedFiles = item.DeleteChangedFiles,
                         RespectLastAccessDateTime = item.RespectLastAccessDateTime,
                         ShowLog = item.ShowLog
                     };
+
                     await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
                     await Add(dModel).ConfigureAwait(false);
                 }
-            });
+            }
         }
 
         private SyncsModel GetModel()
@@ -135,12 +190,10 @@ namespace FS
                     Root = p.Root,
                     Interval = p.Interval,
                     TargetDirectory = p.TargetDirectory,
-                    CopyEmptyDirectories = p.CopyEmptyDirectories,
                     CopyLeftOnlyFiles = p.CopyLeftOnlyFiles,
                     UpdateChangedFiles = p.UpdateChangedFiles,
                     DeleteSameFiles = p.DeleteSameFiles,
                     DeleteRightOnlyFiles = p.DeleteRightOnlyFiles,
-                    DeleteRightOnlyDirectories = p.DeleteRightOnlyDirectories,
                     DeleteChangedFiles = p.DeleteChangedFiles,
                     RespectLastAccessDateTime = p.RespectLastAccessDateTime,
                     ShowLog = p.ShowLog,
