@@ -13,7 +13,7 @@ namespace FS
 {
     public sealed class SyncsViewModel : BusinessViewModelListBase<DirectoriesViewModel>
     {
-        private const string _key = "FS.SyncsViewModel";
+        private const string Key = "FS.SyncsViewModel";
         private readonly string _connectionString;
 
         private string _root;
@@ -127,7 +127,7 @@ namespace FS
             using (var db = new LiteDatabase(_connectionString))
             {
                 var models = db.GetCollection<SyncsModel>();
-                var id = new BsonValue(_key);
+                var id = new BsonValue(Key);
                 var model = models.FindById(id);
                 if (model is null)
                 {
@@ -146,7 +146,7 @@ namespace FS
             {
                 var models = db.GetCollection<SyncsModel>();
 
-                var model = models.FindById(new BsonValue(_key));
+                var model = models.FindById(new BsonValue(Key));
 
                 if (model is null)
                     return;

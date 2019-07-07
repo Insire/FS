@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.27" />
+    <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.32" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.2" />
   </ItemGroup>
 </Project>
