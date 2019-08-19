@@ -1,4 +1,4 @@
-﻿using LiteDB;
+using LiteDB;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
@@ -30,7 +30,9 @@ namespace FS
         public SyncsViewModel(ICommandBuilder commandBuilder)
             : base(commandBuilder)
         {
-            _connectionString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FS", "FS.db");
+            var dbFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FS");
+            Directory.CreateDirectory(dbFolder);
+            _connectionString = Path.Combine(dbFolder, "FS.db");
 
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
