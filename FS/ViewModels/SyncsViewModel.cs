@@ -173,8 +173,8 @@ namespace FS
                         ShowLog = item.ShowLog
                     };
 
-                    await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
-                    await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(p.Value))).ConfigureAwait(false);
+                    await dModel.Excludes.AddRange(item.Excludes.Select(p => new Pattern(CommandBuilder, CommandManager, dModel, p.Value))).ConfigureAwait(false);
+                    await dModel.Includes.AddRange(item.Includes.Select(p => new Pattern(CommandBuilder, CommandManager, dModel, p.Value))).ConfigureAwait(false);
                     await Add(dModel).ConfigureAwait(false);
                 }
             }

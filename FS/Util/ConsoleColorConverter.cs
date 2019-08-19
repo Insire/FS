@@ -1,4 +1,4 @@
-﻿using MvvmScarletToolkit;
+using MvvmScarletToolkit;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

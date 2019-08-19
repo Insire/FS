@@ -1,9 +1,11 @@
-﻿using FS.Sync;
+using FS.Sync;
+using GlobExpressions;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -195,13 +197,14 @@ namespace FS
 
         protected override async Task RefreshInternal(CancellationToken token)
         {
-            var includes = Task.Run(() => Includes.GetDirectories().ToArray());
-            var excludes = Task.Run(() => Excludes.GetDirectories().ToArray());
+            var includes = Task.Run(() => GetDirectories(Includes.Items).ToArray());
+            var excludes = Task.Run(() => GetDirectories(Excludes.Items).ToArray());
 
             await Task.WhenAll(includes, excludes).ConfigureAwait(false);
 
             await AddRange(includes.Result.Except(excludes.Result)
                     .Distinct()
+                    .Select(p => p.Replace("\\", "/"))
                     .OrderBy(p => p)
                     .Select(p => new DirectoryViewModel(p))).ConfigureAwait(false);
         }
@@ -341,7 +344,7 @@ namespace FS
                 .Trim('\\')
                 .Trim('/');
 
-            await Excludes.Add(new Pattern($"**/{pathWithOutRoot}")).ConfigureAwait(false);
+            await Excludes.Add(new Pattern(CommandBuilder,CommandManager,this,$"**/{pathWithOutRoot}")).ConfigureAwait(false);
             await Remove().ConfigureAwait(false);
         }
 
@@ -351,6 +354,18 @@ namespace FS
                 && SelectedItem != null
                 && !string.IsNullOrWhiteSpace(SelectedItem.FullPath)
                 && !Excludes.Items.Any(p => p.Value.Equals(SelectedItem.FullPath));
+        }
+
+        public IEnumerable<string> GetDirectories(IEnumerable<Pattern> patterns)
+        {
+            var root = new DirectoryInfo(Root);
+
+            return patterns
+                .Where(p => !string.IsNullOrWhiteSpace(p.Value))
+                .Select(p => p.Value.Replace("\\", "/"))
+                .Select(p => Glob.Directories(root, p, GlobOptions.CaseInsensitive | GlobOptions.Compiled))
+                .SelectMany(p => p)
+                .Select(p => p.FullName);
         }
     }
 }
