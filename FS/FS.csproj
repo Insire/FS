@@ -1,28 +1,30 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>netcoreapp3.0</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Controls\BusyAnimation.xaml" />
-    <None Remove="CountDown.xaml" />
-    <None Remove="Resources\Styles.xaml" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Controls\BusyAnimation.xaml" />
+        <None Remove="CountDown.xaml" />
+        <None Remove="Resources\Styles.xaml" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LiteDB" Version="4.1.4" />
-    <PackageReference Include="DryIoc.dll" Version="4.0.5" />
-    <PackageReference Include="Glob" Version="1.1.3" />
-    <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="3.0.0-alpha0176" />
-    <PackageReference Include="MvvmScarletToolkit" Version="2.0.32" />
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="LiteDB" Version="4.1.4" />
+        <PackageReference Include="DryIoc.dll" Version="4.0.7" />
+        <PackageReference Include="Glob" Version="1.1.3" />
+        <PackageReference Include="MahApps.Metro.IconPacks.FontAwesome" Version="3.0.0-alpha0176" />
+        <PackageReference Include="MvvmScarletToolkit" Version="2.0.55" />
+        <PackageReference Include="System.Reactive" Version="4.2.0" />
+        <PackageReference Include="MvvmScarletToolkit.Abstractions" Version="2.0.55" />
+        <PackageReference Include="MvvmScarletToolkit.Implementations" Version="2.0.55" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FS.Sync\FS.Sync.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\FS.Sync\FS.Sync.csproj" />
+    </ItemGroup>
 </Project>

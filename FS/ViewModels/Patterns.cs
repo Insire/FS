@@ -1,12 +1,7 @@
-using GlobExpressions;
-using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Commands;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -44,7 +39,7 @@ namespace FS
         {
             using (BusyStack.GetToken())
             {
-                await Add(new Pattern(CommandBuilder,CommandManager, _directoriesViewModel, Content)).ConfigureAwait(false);
+                await Add(new Pattern(CommandBuilder, CommandManager, _directoriesViewModel, Content)).ConfigureAwait(false);
             }
         }
 

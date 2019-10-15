@@ -1,6 +1,5 @@
 using LiteDB;
-using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Commands;
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Observables;
 using System;
 using System.IO;

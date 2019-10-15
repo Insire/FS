@@ -1,7 +1,6 @@
 using FS.Sync;
 using GlobExpressions;
 using MvvmScarletToolkit;
-using MvvmScarletToolkit.Abstractions;
 using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
@@ -344,7 +343,7 @@ namespace FS
                 .Trim('\\')
                 .Trim('/');
 
-            await Excludes.Add(new Pattern(CommandBuilder,CommandManager,this,$"**/{pathWithOutRoot}")).ConfigureAwait(false);
+            await Excludes.Add(new Pattern(CommandBuilder, CommandManager, this, $"**/{pathWithOutRoot}")).ConfigureAwait(false);
             await Remove().ConfigureAwait(false);
         }
 

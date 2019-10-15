@@ -1,5 +1,5 @@
+using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
 using System;
 using System.Collections.Generic;
