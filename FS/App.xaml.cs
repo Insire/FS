@@ -1,4 +1,4 @@
-﻿using DryIoc;
+using DryIoc;
 using MvvmScarletToolkit;
 using System.Windows;
 
@@ -30,7 +30,7 @@ namespace FS
         protected override async void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            await ExitService.Default.ShutDown().ConfigureAwait(false);
+            await ScarletExitService.Default.ShutDown().ConfigureAwait(false);
 
             _container?.Dispose();
         }

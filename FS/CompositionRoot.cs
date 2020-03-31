@@ -1,9 +1,7 @@
-﻿using DryIoc;
+using DryIoc;
 using MvvmScarletToolkit;
 using MvvmScarletToolkit.Abstractions;
-using MvvmScarletToolkit.Commands;
 using MvvmScarletToolkit.Observables;
-using System.ComponentModel;
 
 namespace FS
 {
@@ -16,15 +14,15 @@ namespace FS
             c.Register<DirectoriesViewModel>(Reuse.Singleton);
             c.Register<SyncsViewModel>(Reuse.Singleton);
             c.Register<MainViewModel>(Reuse.Singleton);
-            c.Register<ICommandBuilder, CommandBuilder>(Reuse.Singleton);
 
             c.Register<IBusyStack, BusyStack>(Reuse.Transient);
 
-            c.UseInstance(typeof(IScarletCommandManager), ScarletCommandManager.Default);
-            c.UseInstance(typeof(IScarletDispatcher), ScarletDispatcher.Default);
-            c.UseInstance(typeof(IExitService), ExitService.Default);
-            c.UseInstance(typeof(IScarletMessenger), ScarletMessenger.Default);
-            c.UseInstance(typeof(IWeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>), ScarletWeakEventManager.Default);
+            c.UseInstance(ScarletCommandBuilder.Default);
+            c.UseInstance(ScarletCommandManager.Default);
+            c.UseInstance(ScarletDispatcher.Default);
+            c.UseInstance(ScarletExitService.Default);
+            c.UseInstance(ScarletMessenger.Default);
+            c.UseInstance(ScarletWeakEventManager.Default);
 
             return c;
         }
