@@ -8,12 +8,12 @@ namespace FS
 {
     public sealed class LogViewModel : ViewModelListBase<LogEntry>
     {
-        public LogViewModel(ICommandBuilder commandBuilder)
+        public LogViewModel(IScarletCommandBuilder commandBuilder)
             : base(commandBuilder)
         {
         }
 
-        public async Task Add(LogEntry item, CancellationToken token)
+        public override async Task Add(LogEntry item, CancellationToken token)
         {
             if (item is null)
             {

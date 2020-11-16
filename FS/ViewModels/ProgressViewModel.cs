@@ -37,7 +37,7 @@ namespace FS
             set { SetValue(ref _value, value); }
         }
 
-        public ProgressViewModel(ICommandBuilder commandBuilder, Progress<int> progress, DirectoriesViewModel directoriesViewModel)
+        public ProgressViewModel(IScarletCommandBuilder commandBuilder, Progress<int> progress, DirectoriesViewModel directoriesViewModel)
             : base(commandBuilder)
         {
             _directoriesViewModel = directoriesViewModel ?? throw new ArgumentNullException(nameof(directoriesViewModel));

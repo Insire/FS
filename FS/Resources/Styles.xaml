@@ -3,7 +3,7 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:local="clr-namespace:FS"
                     xmlns:mah="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                    xmlns:mvvm="clr-namespace:MvvmScarletToolkit;assembly=MvvmScarletToolkit">
+                    xmlns:mvvm="http://SoftThorn.MvvmScarletToolkit.com/winfx/xaml/shared">
 
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 

@@ -39,7 +39,7 @@ namespace FS
 
         public ICommand UpdatePreviewCommand { get; }
 
-        public Pattern(ICommandBuilder commandBuilder, IScarletCommandManager commandManager, DirectoriesViewModel directoriesViewModel, string value)
+        public Pattern(IScarletCommandBuilder commandBuilder, IScarletCommandManager commandManager, DirectoriesViewModel directoriesViewModel, string value)
             : base(commandBuilder)
         {
             _directoriesViewModel = directoriesViewModel ?? throw new ArgumentNullException(nameof(directoriesViewModel));
@@ -47,7 +47,7 @@ namespace FS
 
             UpdatePreviewCommand = commandBuilder
                 .Create(UpdatePreview, CanUpdatePreview)
-                .WithSingleExecution(commandManager)
+                .WithSingleExecution()
                 .Build();
         }
 

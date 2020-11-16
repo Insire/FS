@@ -22,14 +22,14 @@ namespace FS
 
         public ICommand AddCommand { get; }
 
-        public Patterns(ICommandBuilder commandBuilder, DirectoriesViewModel directoriesViewModel)
+        public Patterns(IScarletCommandBuilder commandBuilder, DirectoriesViewModel directoriesViewModel)
             : base(commandBuilder)
         {
             _directoriesViewModel = directoriesViewModel ?? throw new ArgumentNullException(nameof(directoriesViewModel));
 
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .Build();
 
             Messenger.Subscribe<ViewModelListBaseSelectionChanged<Pattern>>(OnSelectionChanged, OnSelectionChangedReceived);

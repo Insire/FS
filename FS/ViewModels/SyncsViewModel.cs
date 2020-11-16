@@ -26,7 +26,7 @@ namespace FS
 
         public ICommand CloneCommand { get; }
 
-        public SyncsViewModel(ICommandBuilder commandBuilder)
+        public SyncsViewModel(IScarletCommandBuilder commandBuilder)
             : base(commandBuilder)
         {
             var dbFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FS");
@@ -35,13 +35,13 @@ namespace FS
 
             AddCommand = commandBuilder
                 .Create(Add, CanAdd)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .WithBusyNotification(BusyStack)
                 .Build();
 
             CloneCommand = commandBuilder
                 .Create(Clone, CanClone)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .WithBusyNotification(BusyStack)
                 .WithCancellation()
                 .Build();

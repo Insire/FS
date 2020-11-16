@@ -142,14 +142,14 @@ namespace FS
         public IntervalType IntervalType
         {
             get { return _intervalType; }
-            set { SetValue(ref _intervalType, value, OnChanged: OnIntervalTypeChanged); }
+            set { SetValue(ref _intervalType, value, onChanged: OnIntervalTypeChanged); }
         }
 
         private string _intervalInput = "30";
         public string IntervalInput
         {
             get { return _intervalInput; }
-            set { SetValue(ref _intervalInput, value, OnChanged: OnIntervalInputChanged); }
+            set { SetValue(ref _intervalInput, value, onChanged: OnIntervalInputChanged); }
         }
 
         private DateTime _nextExecution;
@@ -163,7 +163,7 @@ namespace FS
         public ICommand StartTimedSynchronizationCommand { get; }
         public ICommand SyncCommand => _syncCommand;
 
-        public DirectoriesViewModel(ICommandBuilder commandBuilder)
+        public DirectoriesViewModel(IScarletCommandBuilder commandBuilder)
             : base(commandBuilder)
         {
             var progress = new Progress<int>();
@@ -176,21 +176,21 @@ namespace FS
 
             _syncCommand = commandBuilder
                 .Create(Synchronize, CanSync)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .WithBusyNotification(BusyStack)
                 .WithCancellation()
                 .Build();
 
             StartTimedSynchronizationCommand = commandBuilder
                 .Create(StartTimedSynchronization, CanStartTimedSynchronization)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .WithBusyNotification(BusyStack)
                 .WithCancellation()
                 .Build();
 
             ExcludeCommand = commandBuilder
                 .Create(Exclude, CanExclude)
-                .WithSingleExecution(CommandManager)
+                .WithSingleExecution()
                 .Build();
         }
 
